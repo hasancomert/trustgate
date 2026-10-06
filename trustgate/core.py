@@ -20,6 +20,7 @@ from trustgate.ml import MLClassifier
 from trustgate.rules import build_engine
 from trustgate.schemas import RiskReport, VerificationRequest, Verdict
 from trustgate.scoring import ACTIONS, fuse, merge_flags, resolve_scam_type, safe_steps, template_summary, verdict_for
+from trustgate.share import share_text
 
 logger = logging.getLogger(__name__)
 
@@ -97,6 +98,8 @@ class TrustGate:
             link_findings=rule_result.link_findings,
             safe_steps=safe_steps(verdict, scam_type, request, llm),
             signals=signals,
+            language="tr" if turkish else "en",
+            share_text=share_text(verdict, scam_type, flags, "tr" if turkish else "en"),
             disclaimer=DISCLAIMER,
             engine_version=__version__,
             latency_ms=int((time.perf_counter() - started) * 1000),

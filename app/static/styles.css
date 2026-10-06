@@ -231,6 +231,10 @@ mark[data-tip]:hover::after, mark[data-tip]:focus::after {
 .brand-warning { color: var(--dangerous); font-weight: 700; }
 
 .steps { margin: 0; padding-left: 22px; }
+.share { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin-top: 12px; }
+.share-btn { padding: 8px 16px; color: var(--text); }
+.share-status { font-size: 13px; color: var(--muted); }
+.share-fallback { flex-basis: 100%; font: inherit; font-size: 13px; padding: 8px 10px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface-2); color: var(--text); resize: vertical; }
 .steps li { margin-bottom: 8px; padding-left: 4px; }
 .steps li::marker { font-weight: 800; color: var(--primary); }
 

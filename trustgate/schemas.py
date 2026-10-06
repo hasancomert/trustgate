@@ -188,6 +188,11 @@ class RiskReport(BaseModel):
     link_findings: list[LinkFinding]
     safe_steps: list[str]
     signals: SignalBreakdown
+    language: Literal["en", "tr"] = Field(default="en", description="Detected language of the message.")
+    share_text: str | None = Field(
+        default=None,
+        description="Short warning to forward to family or colleagues, in the message's language; null when safe.",
+    )
     disclaimer: str
     engine_version: str
     latency_ms: int
