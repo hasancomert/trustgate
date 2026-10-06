@@ -78,6 +78,8 @@ TEXT_RULES: tuple[TextRule, ...] = (
             _p(r"\b(you will|you'll) (lose|be charged|be fined|be penali[sz]ed|be reported)\b", H),
             _p(r"\bfailure to (respond|comply|pay|verify|act)\b", H),
             _p(r"\b(fine|penalty|surcharge) of\b", M),
+            _p(r"\b(late|additional|extra)\s+(penalty|fees?|fines?|charges?)\b", M),
+            _p(r"\bfurther (legal )?action\b", M),
         ),
     ),
     TextRule(
@@ -107,7 +109,8 @@ TEXT_RULES: tuple[TextRule, ...] = (
         "Being told not to tell anyone cuts you off from the people who would spot the scam.",
         (
             _p(r"\b(keep|treat)\s+(this|it|the matter|this request)\s+(strictly\s+)?(confidential|private|secret|quiet|between us|to yourself)\b", H),
-            _p(r"\b(don't|dont|do not|please don't)\s+(tell|inform|mention (this|it) to|discuss (this|it) with|involve|call|contact)\b[^.!?\n]{0,30}\b(anyone|anybody|your bank|the bank|family|dad|mum|mom|colleagues|manager|accounts|police|husband|wife|others)\b", H, unless_after=_PROTECTIVE),
+            _p(r"\b(don't|dont|do not|please don't)\s+(tell|inform|mention (this|it) to|discuss (this|it) with|involve|call|contact)\b[^.!?\n]{0,30}\b(anyone|anybody|your bank|the bank|branch staff|family|dad|mum|mom|sister|brother|son|daughter|partner|friends?|colleagues|manager|accounts|treasury|police|husband|wife|others)\b", H, unless_after=_PROTECTIVE),
+            _p(r"\b(no need to|don't|do not)\s+(loop in|involve|cc|copy in)\b", H),
             _p(r"\b(confidential|discreet|discretion)\b[^.!?\n]{0,40}\b(transaction|payment|deal|acquisition|matter|request|transfer|project)\b", H),
             _p(r"\bbetween (you and me|us)\b", M),
         ),
@@ -119,6 +122,8 @@ TEXT_RULES: tuple[TextRule, ...] = (
             _p(r"\b(can't|cannot|unable to)\s+(talk|speak|call|answer|take calls|pick up)\b", M),
             _p(r"\b(i'm|i am)\s+(in|stuck in)\s+(a\s+)?(meeting|conference|board meeting)\b", M),
             _p(r"\b(only|just)\s+(text|message|whatsapp|email)\s+me\b", L),
+            _p(r"\b(do not|don't)\s+(use|open|log into|call|visit|contact)\s+(the|your)\s+(banking\s+|mobile\s+)?(app|branch|website|bank)\b", H),
+            _p(r"\b(unreachable|on a flight|about to board|boarding now)\b", M),
         ),
     ),
     TextRule(
@@ -142,6 +147,8 @@ TEXT_RULES: tuple[TextRule, ...] = (
             _p(rf"\b(send|transfer|wire|lend|pay|cover)\b[^.!?\n]{{0,30}}?{_MONEY}", M),
             _p(rf"{_MONEY}[^.!?\n]{{0,30}}\b(to|into) (this|my|the following|a new) (account|iban)\b", M),
             _p(r"\bneed (some |a bit of )?(money|cash|help with (a|the) (bill|payment|rent))\b", M),
+            _p(r"\bwithdraw\b[^.!?\n]{0,20}\b(cash|money|the money|savings)\b", M),
+            _p(r"\b(bail|lawyer'?s? fees?|hospital (bill|fees?))\b", M),
         ),
     ),
     TextRule(
@@ -149,7 +156,23 @@ TEXT_RULES: tuple[TextRule, ...] = (
         "Fake couriers, prizes and 'refunds' ask for a small fee to harvest card details.",
         (
             _p(r"\bpay\b[^.!?\n]{0,15}\b(small |customs |delivery |redelivery |re-delivery |shipping |release |processing |handling |admin |clearance |unpaid |outstanding )+(fee|charge|duty|postage)\b", H),
-            _p(r"\b(processing|release|clearance|activation|unlock|withdrawal|redelivery|re-delivery|customs) fee\b", M),
+            _p(r"\b(processing|release|clearance|activation|unlock|withdrawal|redelivery|re-delivery|customs|shipping|handling) (fee|deposit|charge|payment)\b", M),
+            _p(r"\b(unpaid|outstanding|overdue)\s+(\w+\s+)?(fee|charge|toll|fine|duty|balance)\b", M),
+        ),
+    ),
+    TextRule(
+        "text.cash_pickup", "cash_pickup", "Courier collecting cash or cards",
+        "Sending a 'courier' to collect cash, cards or valuables from your door is a known fraud script.",
+        (
+            _p(r"\b(courier|driver|agent|officer|messenger|someone)\b[^.!?\n]{0,40}\b(collect|pick up|pick it up|come to your (house|home|door|address))\b", H),
+        ),
+    ),
+    TextRule(
+        "text.overpayment", "overpayment", "Overpayment and refund request",
+        "A buyer who 'overpays' and asks you to refund the difference is running an overpayment scam.",
+        (
+            _p(r"\b(overpaid|overpayment|paid (you )?(too much|extra)|extra to cover)\b", H),
+            _p(r"\brefund the (difference|extra|balance|excess)\b", H),
         ),
     ),
     TextRule(
@@ -187,9 +210,9 @@ TEXT_RULES: tuple[TextRule, ...] = (
         "text.credential_request", "credential_request", "Asks for passwords or codes",
         "Banks and services never ask you to send passwords, PINs or one-time codes.",
         (
-            _p(r"\b(enter|provide|send|share|give|tell|read out|confirm|forward|reply with|text back)\b[^.!?\n]{0,25}\b(password|passcode|pin|otp|one[- ]time (code|password|passcode)|verification code|security code|auth(entication)? code|2fa code|cvv|cvc|card number|full card details|login details|credentials|sms code|the code (we|you|i) (just )?(sent|received|got))\b", C, unless_before=_NEGATED),
-            _p(r"\b(verify|confirm|update|validate|re-?activate|unlock|restore)\s+(your\s+)?(account|identity|details|information|card|payment (details|information|method)|login|billing( information)?)\b", H, unless_before=_NEGATED),
-            _p(r"\b(log ?in|sign ?in)\s+(here|now|below|via the link|at the link|to (verify|confirm|restore|unlock))\b", M),
+            _p(r"\b(enter|provide|send|share|give|tell|read out|confirm|forward|reply with|text back)\b[^.!?\n]{0,25}\b(password|passcode|pin|otp|one[- ]time (code|password|passcode)|verification code|security code|auth(entication)? code|2fa code|cvv|cvc|card number|full card details|login details|credentials|sms code|(the |your )?(\d-digit |\w+-digit )?code (we|you|i|that) (just )?(sent|received|got))\b", C, unless_before=_NEGATED),
+            _p(r"\b(verify|confirm|update|validate|re-?activate|unlock|restore|secure)\s+(your\s+)?(account|identity|details|information|card|payment (details|information|method)|login|billing( information)?)\b", H, unless_before=_NEGATED),
+            _p(r"\b(log[- ]?in|sign[- ]?in)\s+(here|now|below|via the link|at the link|to (verify|confirm|restore|unlock))\b", M),
         ),
     ),
     TextRule(
@@ -228,6 +251,8 @@ TEXT_RULES: tuple[TextRule, ...] = (
             _p(r"\b(daily|weekly) (returns?|profits?|payouts?)\b", H),
             _p(r"\b(trading|investment) (platform|opportunity|group|mentor|signals?|bot)\b", M),
             _p(r"\bpassive income\b", L),
+            _p(r"\b(made|earned|profited|got back)\s+[$€£]?\d[\d,.]*k?\b[^.!?\n]{0,25}\b(this|in a|in one|last)\s+(week|day|month)\b", M),
+            _p(r"\b(capital|money|funds) (is |are )?(fully |100% )?(protected|guaranteed|insured)\b", H),
         ),
     ),
     TextRule(
@@ -247,7 +272,7 @@ TEXT_RULES: tuple[TextRule, ...] = (
         (
             _p(r"\bearn\s+[$€£₺]?\s?\d[\d,.]*\s*(\+\s*)?(per|a|/)\s*(day|hour|week)\b", H),
             _p(r"\b(simple|easy) (online )?tasks?\b", M),
-            _p(r"\b(like|rate|review)\s+(videos|products|hotels|apps)\b", M),
+            _p(r"\b(like|liking|rate|rating|review|reviewing)\s+(videos|products|hotels|apps|movies)\b", M),
             _p(r"\b(work|job) from home\b", L),
         ),
     ),

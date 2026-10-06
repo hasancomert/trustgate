@@ -81,8 +81,11 @@ def extract_urls(text: str) -> list[ExtractedUrl]:
     found: list[ExtractedUrl] = []
     for m in _URL_RE.finditer(text):
         tld = m.group("tld")
-        if tld is not None and tld.lower() not in _BARE_TLDS and not tld.lower().startswith("xn--"):
-            continue
+        if tld is not None:
+            if tld.lower() not in _BARE_TLDS and not tld.lower().startswith("xn--"):
+                continue
+            if tld[0].isupper() and tld[1:].islower():  # "telephony.Click" is a missing space, not a domain
+                continue
         raw = m.group(0)
         while raw and raw[-1] in _TRAILING_PUNCT:
             if raw[-1] == ")" and raw.count("(") >= raw.count(")"):
@@ -419,6 +422,9 @@ def analyze_url(url: ExtractedUrl, ctx: LinkContext) -> tuple[LinkFinding | None
         return None, []
 
     issues = _hygiene_issues(parsed)
+    if ctx.sender_domain and parsed.registered_domain == ctx.sender_domain:
+        # A login/reset link on the sender's own domain is expected, not a red flag.
+        issues = [i for i in issues if not (i.category == "link_hygiene" and i.severity is Severity.LOW)]
     impersonation = lookalike_issues(parsed)
     issues += impersonation
     issues += _context_issues(parsed, ctx, already_impersonated=any(i.severity.rank >= Severity.HIGH.rank for i in impersonation))
