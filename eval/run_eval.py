@@ -25,6 +25,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import sys
 from collections.abc import Callable
 from dataclasses import dataclass
@@ -155,6 +156,17 @@ def build_runners(modes: list[str]) -> dict[str, Runner]:
     return runners
 
 
+def wilson(k: int, n: int, z: float = 1.96) -> tuple[float, float] | None:
+    """95% Wilson score interval for k successes out of n; honest at small n, unlike p ± 1.96·se."""
+    if n == 0:
+        return None
+    p = k / n
+    denom = 1 + z * z / n
+    centre = (p + z * z / (2 * n)) / denom
+    half = z * math.sqrt(p * (1 - p) / n + z * z / (4 * n * n)) / denom
+    return round(max(0.0, centre - half), 3), round(min(1.0, centre + half), 3)
+
+
 def metrics(scenarios: list[Scenario], outcomes: list[Outcome]) -> dict:
     tp = sum(s.is_scam and o.flagged for s, o in zip(scenarios, outcomes))
     fp = sum((not s.is_scam) and o.flagged for s, o in zip(scenarios, outcomes))
@@ -167,6 +179,7 @@ def metrics(scenarios: list[Scenario], outcomes: list[Outcome]) -> dict:
     type_hits = sum(o.scam_type in (s.scam_type, *s.acceptable_types) for s, o in typed)
     result = {
         "precision": round(precision, 3), "recall": round(recall, 3), "f1": round(f1, 3),
+        "precision_ci95": wilson(tp, tp + fp), "recall_ci95": wilson(tp, tp + fn),
         "accuracy": round((tp + tn) / len(scenarios), 3) if scenarios else 0.0,
         "confusion_matrix": {"tn": tn, "fp": fp, "fn": fn, "tp": tp},
     }
@@ -233,9 +246,21 @@ def _pct(x: float | None) -> str:
     return "n/a" if x is None else f"{x:.3f}"
 
 
+def _with_ci(value: float, k: int, n: int) -> str:
+    # Computed from the confusion matrix, so results written before CIs existed get them too.
+    ci = wilson(k, n)
+    return f"{value:.3f} ({ci[0]:.2f}–{ci[1]:.2f})" if ci else f"{value:.3f}"
+
+
+def _p_r(m: dict) -> tuple[str, str]:
+    cm = m["confusion_matrix"]
+    return _with_ci(m["precision"], cm["tp"], cm["tp"] + cm["fp"]), _with_ci(m["recall"], cm["tp"], cm["tp"] + cm["fn"])
+
+
 def _metrics_row(label: str, m: dict) -> str:
     cm = m["confusion_matrix"]
-    return (f"| {label} | {m['precision']:.3f} | {m['recall']:.3f} | {m['f1']:.3f} | {m['accuracy']:.3f} | "
+    precision, recall = _p_r(m)
+    return (f"| {label} | {precision} | {recall} | {m['f1']:.3f} | {m['accuracy']:.3f} | "
             f"{cm['tn']} | {cm['fp']} | {cm['fn']} | {cm['tp']} | {_pct(m.get('scam_type_accuracy'))} |")
 
 
@@ -246,16 +271,17 @@ def _set_section(result: dict) -> list[str]:
     lines = [
         f"## {result['title']} ({n_scam} scams, {len(first) - n_scam} legitimate)", "",
         f"_{result['note']}_ Generated {result['generated_at']}.", "",
-        "| Mode | Precision | Recall | F1 | Accuracy | TN | FP | FN | TP | Scam-type accuracy |",
+        "| Mode | Precision (95% CI) | Recall (95% CI) | F1 | Accuracy | TN | FP | FN | TP | Scam-type accuracy |",
         "|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|",
     ]
     lines += [_metrics_row(mode, data["metrics"]) for mode, data in result["modes"].items()]
     if any("by_lang" in d for d in result["modes"].values()):
-        lines += ["", "By language:", "", "| Mode | Language | Precision | Recall | F1 | FP | FN |", "|---|---|---:|---:|---:|---:|---:|"]
+        lines += ["", "By language:", "", "| Mode | Language | Precision (95% CI) | Recall (95% CI) | F1 | FP | FN |", "|---|---|---:|---:|---:|---:|---:|"]
         for mode, data in result["modes"].items():
             for lang, m in data.get("by_lang", {}).items():
                 cm = m["confusion_matrix"]
-                lines.append(f"| {mode} | {lang} | {m['precision']:.3f} | {m['recall']:.3f} | {m['f1']:.3f} | {cm['fp']} | {cm['fn']} |")
+                precision, recall = _p_r(m)
+                lines.append(f"| {mode} | {lang} | {precision} | {recall} | {m['f1']:.3f} | {cm['fp']} | {cm['fn']} |")
     for mode, data in result["modes"].items():
         inj = data.get("injection")
         if inj and "llm_judged" in inj:
@@ -318,7 +344,11 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--sets", default=",".join(SETS), help="comma-separated scenario sets (missing files are skipped)")
     parser.add_argument("--modes", default="rules,ml,fused-mock", help="comma-separated modes (add fused-live to call the LLM)")
+    parser.add_argument("--summary-only", action="store_true", help="rebuild SUMMARY.md from stored results without running")
     args = parser.parse_args(argv)
+    if args.summary_only:
+        (RESULTS_DIR / "SUMMARY.md").write_text(write_summary())
+        return 0
 
     names = [n.strip() for n in args.sets.split(",") if n.strip()]
     unknown = [n for n in names if n not in SETS]

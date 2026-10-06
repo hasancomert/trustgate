@@ -28,7 +28,8 @@ const FLAGS_VISIBLE = 6;
 const GAUGE_CIRCUMFERENCE = 2 * Math.PI * 52;
 
 // `run` numbers each submission so a slow response can never overwrite a newer one.
-const state = { examples: {}, loadingTimer: null, llmLive: false, run: 0 };
+const state = { examples: {}, loadingTimer: null, llmLive: false, run: 0, shareText: "" };
+const SHARE_FOOTER = { en: "Check a message yourself:", tr: "Sen de kontrol et:" };
 
 // ------------------------------------------------------------------ setup
 
@@ -44,6 +45,7 @@ document.addEventListener("DOMContentLoaded", () => {
   document.querySelectorAll("[data-example]").forEach((button) => {
     button.addEventListener("click", () => loadExample(button.dataset.example));
   });
+  $("#share-btn").addEventListener("click", shareWarning);
   loadHealth();
   loadExamples();
 });
@@ -241,6 +243,39 @@ function showPendingNote(text) {
   pending.hidden = false;
 }
 
+// ------------------------------------------------------------------ sharing
+
+function renderShare(report) {
+  const footer = SHARE_FOOTER[report.language] || SHARE_FOOTER.en;
+  state.shareText = report.share_text ? `${report.share_text}\n\n${footer} ${location.origin}` : "";
+  $("#share").hidden = !state.shareText;
+  $("#share-status").textContent = "";
+  $("#share-fallback").hidden = true;
+}
+
+// Phones get the native share sheet (WhatsApp, SMS…); desktops copy the text.
+async function shareWarning() {
+  const text = state.shareText;
+  if (!text) return;
+  const status = $("#share-status");
+  try {
+    if (navigator.share && window.matchMedia("(pointer: coarse)").matches) {
+      await navigator.share({ text });
+      status.textContent = "Shared.";
+    } else {
+      await navigator.clipboard.writeText(text);
+      status.textContent = "Warning copied. Paste it into a chat.";
+    }
+  } catch (err) {
+    if (err && err.name === "AbortError") return; // the share sheet was closed
+    const fallback = $("#share-fallback");
+    fallback.value = text;
+    fallback.hidden = false;
+    fallback.select();
+    status.textContent = "Copy the warning below.";
+  }
+}
+
 // ------------------------------------------------------------------ rendering
 
 function renderReport(report, message, preliminary = false) {
@@ -262,6 +297,7 @@ function renderReport(report, message, preliminary = false) {
   renderFlags(report.red_flags);
   renderLinks(report.link_findings);
   $("#steps").replaceChildren(...report.safe_steps.map((step) => el("li", null, step)));
+  renderShare(report);
   renderSignals(report.signals, preliminary);
   $("#disclaimer").textContent = report.disclaimer;
   const llm = report.signals.llm;

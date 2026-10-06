@@ -72,6 +72,9 @@ class LLMSettings(BaseModel):
     temperature: float = Field(ge=0, le=2)
     api_key: str | None = None
     mode: LLMMode = "auto"
+    # Process-wide caps on live calls (0 disables); past them the analyst falls back to rule-based text.
+    max_calls_per_minute: int = Field(default=30, ge=0)
+    max_calls_per_day: int = Field(default=3000, ge=0)
 
     @property
     def live_enabled(self) -> bool:

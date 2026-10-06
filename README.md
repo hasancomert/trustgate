@@ -43,6 +43,7 @@ For every check, TrustGate returns a `RiskReport` with:
 - **safe next steps** tailored to the scam type (e.g. *call back on a number you already have*)
 - a **per-layer signal breakdown** so the score is explainable
 - an **instant first answer** from the rules and classifier (about 0.3 s), refined by the AI analyst a few seconds later
+- a **ready-to-forward warning** (`share_text`) in the message's language, for the family member or colleague who received the same scam
 
 ## How it works
 
@@ -120,7 +121,7 @@ python -m trustgate.ml.train        # ~1 min, writes models/tfidf_lr.joblib (add
 cp .env.example .env                # optional: set LLM_API_KEY for live AI analysis
 uvicorn app.main:app --reload       # open http://127.0.0.1:8000
 
-pytest                              # 197 tests, no network or datasets needed
+pytest                              # 205 tests, no network or datasets needed
 ```
 
 Without an API key everything still works: the LLM layer runs in mock mode and its weight is redistributed to the other layers.
@@ -130,6 +131,8 @@ Without an API key everything still works: the LLM layer runs in mock mode and i
 ### Web UI
 
 Paste a message in English or Turkish, optionally add the sender, payment and links, and press **Verify**. The **Dangerous / Suspicious / Safe / AI agent / Turkish** buttons load demo cases.
+
+For a suspicious or dangerous result, **Warn family or colleagues** opens the phone's share sheet (or copies the text on a desktop): a short warning in English or Turkish naming the scam pattern and its warning signs, without repeating the scam's links or numbers.
 
 The first result appears almost instantly from the rules and the classifier. When the AI analyst is live, it reviews the message in parallel ("AI analyst is reviewing…") and its report replaces the preliminary one a few seconds later; a newer check is never overwritten by an older answer.
 
@@ -204,7 +207,7 @@ print(report.verdict, report.recommended_action, report.scam_type_label)
 | `LLM_MODE` | `auto` | `auto` (live if a key is set), `live`, `mock` |
 | `LLM_TIMEOUT_SECONDS` | `25` | Per-request timeout before falling back |
 
-Weights, thresholds, rule floors, severity points and limits live in [`config/settings.toml`](config/settings.toml).
+Weights, thresholds, rule floors, severity points, request limits and the caps on live LLM calls live in [`config/settings.toml`](config/settings.toml).
 
 **Model choice.** From the Featherless catalog we picked `Qwen/Qwen2.5-14B-Instruct`: it is ungated, cheap (≈$0.11 / M input tokens, ≈$0.28 / M output tokens, so roughly $0.0003 per check) and returned clean JSON in testing, whereas `Qwen3-14B` produced unusable reasoning output.
 
@@ -338,6 +341,7 @@ sequenceDiagram
 
 - Message text and every other user-supplied field are treated as untrusted: they are fenced in the LLM prompt, scanned for instructions aimed at AI systems, rendered with `textContent` in the UI, and the page ships with a strict Content-Security-Policy (no inline scripts or styles).
 - No message contents are logged; logs contain only verdicts, scores and timings.
+- A process-wide cap on live LLM calls (30 a minute, 3,000 a day by default) stops a distributed flood from exhausting the provider's quota; past it, checks continue with the rules and the classifier.
 - No API keys are committed; `.env` is git-ignored. Datasets and model files are git-ignored and rebuilt by scripts.
 
 ## Project structure

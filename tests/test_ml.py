@@ -130,6 +130,14 @@ def test_turkish_set_is_valid_and_balanced():
     assert sum(s.is_scam for s in scenarios) >= 8 and sum(not s.is_scam for s in scenarios) >= 6
 
 
+def test_wilson_interval():
+    run_eval = _load_run_eval()
+    assert run_eval.wilson(0, 0) is None
+    lo, hi = run_eval.wilson(24, 26)
+    assert 0.75 < lo < 0.77 and 0.97 < hi < 0.99
+    assert run_eval.wilson(10, 10)[1] == 1.0 and run_eval.wilson(0, 10)[0] == 0.0
+
+
 def test_eval_metrics():
     run_eval = _load_run_eval()
     scenarios = run_eval.load_scenarios()[:4]

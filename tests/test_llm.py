@@ -3,6 +3,7 @@ import pytest
 from trustgate.config import load_settings
 from trustgate.llm import LLMAnalysis, LLMAnalyst, LLMError
 from trustgate.llm.analyst import ground_flags, LLMFlag
+from trustgate.llm.budget import CallBudget
 from trustgate.llm.client import extract_json
 from trustgate.llm.prompts import SYSTEM_PROMPT, build_user_prompt
 from trustgate.rules import build_engine
@@ -79,6 +80,31 @@ def test_live_mode_caches_identical_requests(settings, rules):
     analyst.analyze(REQ, rules, None)
     second = analyst.analyze(REQ, rules, None)
     assert len(client.calls) == 1 and second.cached
+
+
+def test_call_budget_windows():
+    now = [1_000_000.0]
+    budget = CallBudget(per_minute=2, per_day=3, clock=lambda: now[0])
+    assert budget.try_acquire() is None and budget.try_acquire() is None
+    assert budget.try_acquire() == "minute"
+    now[0] += 61
+    assert budget.try_acquire() is None
+    now[0] += 61
+    assert budget.try_acquire() == "day"
+    now[0] += 86_400
+    assert budget.try_acquire() is None
+    assert CallBudget(per_minute=0, per_day=0).try_acquire() is None
+
+
+def test_budget_exhaustion_falls_back_without_calling_the_provider(settings, rules):
+    client = FakeClient(reply=GOOD)
+    analyst = LLMAnalyst(settings.llm.model_copy(update={"max_calls_per_minute": 1}), client=client)
+    assert analyst.analyze(REQ, rules, None).status == "ok"
+    assert analyst.analyze(REQ, rules, None).cached  # cache hits do not spend the budget
+    other = VerificationRequest(message="Please send the deposit for the flat today.")
+    outcome = analyst.analyze(other, build_engine(settings).analyze(other), None)
+    assert outcome.status == "fallback" and "per-minute usage limit" in outcome.detail
+    assert len(client.calls) == 1
 
 
 @pytest.mark.parametrize("client", [FakeClient(error=LLMError("timeout")), FakeClient(reply={"risk_score": 5}), FakeClient(reply={"risk_score": "abc", "summary": "x"})])
