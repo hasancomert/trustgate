@@ -41,3 +41,5 @@ max_message_chars = 6000
 max_urls = 20
 # Per-client requests per minute on POST /api/verify (protects the LLM budget).
 rate_limit_per_minute = 20
+# Quick checks (POST /api/verify?llm=false) never call the LLM, so they get a looser limit.
+quick_rate_limit_per_minute = 60

@@ -73,7 +73,8 @@ def test_docs_are_served(client):
 def test_examples_are_valid_requests(client):
     from trustgate.schemas import VerificationRequest
     items = client.get("/api/examples").json()
-    assert [i["id"] for i in items] == ["dangerous", "suspicious", "safe"]
+    assert [i["id"] for i in items] == ["dangerous", "suspicious", "safe", "agent"]
+    assert next(i for i in items if i["id"] == "agent")["request"]["initiator"] == "ai_agent"
     for item in items:
         VerificationRequest.model_validate(item["request"])
 
@@ -90,3 +91,14 @@ def test_index_and_static_assets(client):
     assert "default-src 'self'" in r.headers["Content-Security-Policy"]
     for asset in ("/static/app.js", "/static/styles.css", "/static/favicon.svg"):
         assert client.get(asset).status_code == 200
+
+
+def test_quick_mode_skips_llm_and_has_its_own_rate_limit(settings):
+    with make_client(settings, rate_limit_per_minute=1, quick_rate_limit_per_minute=2) as c:
+        body = c.post("/api/verify?llm=false", json={"message": "Buy gift cards now and send me the codes."}).json()
+        assert body["signals"]["llm"]["status"] == "skipped"
+        assert body["verdict"] == "dangerous"
+        assert c.post("/api/verify?llm=false", json={"message": "hello"}).status_code == 200
+        assert c.post("/api/verify?llm=false", json={"message": "hello"}).status_code == 429
+        # Full checks are limited separately.
+        assert [c.post("/api/verify", json={"message": "hello"}).status_code for _ in range(2)] == [200, 429]

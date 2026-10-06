@@ -74,6 +74,7 @@ def create_app(settings: Settings | None = None, gate_factory: Callable[[], Trus
     settings = settings or get_settings()
     gate_factory = gate_factory or (lambda: TrustGate(settings))
     limiter = RateLimiter(settings.limits.rate_limit_per_minute)
+    quick_limiter = RateLimiter(settings.limits.quick_rate_limit_per_minute)
     state: dict[str, TrustGate] = {}
 
     @asynccontextmanager
@@ -110,20 +111,22 @@ def create_app(settings: Settings | None = None, gate_factory: Callable[[], Trus
         return EXAMPLES
 
     @app.post("/api/verify", response_model=RiskReport)
-    def verify_endpoint(payload: VerificationRequest, request: Request) -> RiskReport:
+    def verify_endpoint(payload: VerificationRequest, request: Request, llm: bool = True) -> RiskReport:
+        """Full check. `?llm=false` returns an instant rules + classifier result without the LLM."""
         limits = gate().settings.limits
         if len(payload.message) > limits.max_message_chars:
             raise HTTPException(status_code=413, detail=f"Message is longer than {limits.max_message_chars} characters.")
         if len(payload.urls) > limits.max_urls:
             raise HTTPException(status_code=422, detail=f"At most {limits.max_urls} URLs can be checked at once.")
-        retry_after = limiter.check(client_key(request))
+        retry_after = (limiter if llm else quick_limiter).check(client_key(request))
         if retry_after:
             raise HTTPException(status_code=429, detail="Too many requests, please wait a moment.", headers={"Retry-After": str(retry_after)})
 
-        report = gate().verify(payload)
+        report = gate().verify(payload, use_llm=llm)
         logger.info(
-            "verify id=%s verdict=%s score=%d type=%s llm=%s latency_ms=%d",
-            report.request_id, report.verdict.value, report.risk_score, report.scam_type.value, report.signals.llm.status, report.latency_ms,
+            "verify id=%s mode=%s verdict=%s score=%d type=%s llm=%s latency_ms=%d",
+            report.request_id, "full" if llm else "quick", report.verdict.value, report.risk_score,
+            report.scam_type.value, report.signals.llm.status, report.latency_ms,
         )
         return report
 
