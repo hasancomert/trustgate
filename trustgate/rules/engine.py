@@ -6,14 +6,16 @@ import re
 import unicodedata
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
+from urllib.parse import unquote_plus
 
 from trustgate.rules import lexicons as lx
-from trustgate.rules.link_analysis import LinkContext, analyze_links, lookalike_issues, parse_url, registered_domain, skeleton
-from trustgate.rules.text_rules import TEXT_RULES as _BASE_TEXT_RULES
+from trustgate.rules.link_analysis import LinkContext, analyze_links, extract_urls, lookalike_issues, parse_url, registered_domain, skeleton
+from trustgate.rules.text_rules import AGENT_RULE_ID, TEXT_RULES as _BASE_TEXT_RULES
 from trustgate.rules.text_rules_tr import with_turkish
 from trustgate.schemas import LinkFinding, RedFlag, ScamType, SenderInfo, Severity, VerificationRequest
 
 TEXT_RULES = with_turkish(_BASE_TEXT_RULES)
+_AGENT_RULE = next(r for r in TEXT_RULES if r.rule_id == AGENT_RULE_ID)
 
 MAX_HITS_PER_RULE = 3
 # Brand names in the opening characters read as "who is writing"; later mentions are just content.
@@ -206,6 +208,7 @@ class RuleEngine:
         sender_flags, ctx = _sender_analysis(request.sender, mentioned)
         flags += sender_flags
         flags += _payment_flags(request, ctx)
+        flags += _field_injection_flags(request)
 
         links, link_flags = analyze_links(request.message, request.urls, ctx, max_urls=self.max_urls)
         flags += link_flags
@@ -407,6 +410,35 @@ def _sender_analysis(sender: SenderInfo | None, mentioned: tuple[lx.Brand, ...])
         mentioned_brands=mentioned,
     )
     return flags, ctx
+
+
+_URL_SEPARATORS = re.compile(r"[/_\-+.=&?#:~]+")
+
+
+def _field_injection_flags(request: VerificationRequest) -> list[RedFlag]:
+    """Instructions for AI systems hidden outside the message body: names, accounts, link paths."""
+    fields: list[tuple[str, str, str | None]] = []
+    if request.sender:
+        fields += [("sender", "sender name", request.sender.display_name), ("sender", "claimed organization", request.sender.claimed_organization)]
+    if request.payment:
+        fields += [("payment", "payee name", request.payment.payee_name), ("payment", "payee account", request.payment.payee_account)]
+    fields += [("links", "link", url) for url in [u.raw for u in extract_urls(request.message)] + list(request.urls)]
+
+    patterns = sorted(_AGENT_RULE.patterns, key=lambda p: -p.severity.rank)
+    flags: list[RedFlag] = []
+    for source, label, value in fields:
+        if not value:
+            continue
+        text = _URL_SEPARATORS.sub(" ", unquote_plus(value)) if source == "links" else value
+        hit = next((p for p in patterns if p.regex.search(normalize(text).text)), None)
+        if hit:
+            flags.append(RedFlag(
+                rule_id=_AGENT_RULE.rule_id, category=_AGENT_RULE.category, severity=hit.severity,
+                title=_AGENT_RULE.title,
+                explanation=f"The {label} carries instructions aimed at an AI assistant. Legitimate senders never do this.",
+                evidence=value[:160], source=source,
+            ))
+    return flags
 
 
 # A "large" first payment, in units of the payment currency; 1000 for currencies close to USD/EUR/GBP.
