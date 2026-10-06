@@ -1,0 +1,25 @@
+name: keep-alive
+
+# Render's free instances sleep after 15 minutes without traffic, and the first
+# visit then takes about a minute. Pinging the health endpoint keeps the live demo
+# awake (an always-on service uses ~720 of the 750 free instance hours a month).
+# The health check never calls the LLM, so it costs nothing.
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - name: Ping the live demo
+        env:
+          LIVE_URL: ${{ vars.LIVE_URL || 'https://trustgate-k45p.onrender.com' }}
+        # A failed ping only leaves a warning: a red run every ten minutes would flood the inbox.
+        run: |
+          curl -fsS --retry 3 --retry-delay 15 --retry-all-errors --max-time 90 "$LIVE_URL/api/health" \
+            || echo "::warning::Health check failed for $LIVE_URL"
