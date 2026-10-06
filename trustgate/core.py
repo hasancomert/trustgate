@@ -60,7 +60,9 @@ class TrustGate:
             signals.ml.detail = "Spam-like terms: " + ", ".join(ml_prediction.top_terms)
         verdict = verdict_for(score, self.settings.scoring.thresholds)
         scam_type = resolve_scam_type(verdict, rule_result, llm)
-        flags = merge_flags(rule_result.red_flags, llm.grounded_flags)
+        # LLM phrases are only shown when the analyst itself judges the message risky.
+        llm_flags = llm.grounded_flags if llm.score is not None and llm.score >= self.settings.scoring.thresholds.suspicious else []
+        flags = merge_flags(rule_result.red_flags, llm_flags)
         summary = llm.analysis.summary if llm.status == "ok" and llm.analysis else template_summary(verdict, scam_type, flags)
 
         return RiskReport(

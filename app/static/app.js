@@ -234,13 +234,16 @@ function renderReport(report, message) {
 }
 
 function renderHighlighted(container, text, flags) {
-  const spans = flags.filter((f) => Number.isInteger(f.start) && Number.isInteger(f.end) && f.end > f.start && f.end <= text.length);
-  const points = [...new Set([0, text.length, ...spans.flatMap((f) => [f.start, f.end])])].sort((a, b) => a - b);
+  // Offsets from the API count Unicode code points (Python); JS strings count UTF-16 units,
+  // so slice an array of code points to keep emoji and other astral characters intact.
+  const chars = Array.from(text);
+  const spans = flags.filter((f) => Number.isInteger(f.start) && Number.isInteger(f.end) && f.end > f.start && f.end <= chars.length);
+  const points = [...new Set([0, chars.length, ...spans.flatMap((f) => [f.start, f.end])])].sort((a, b) => a - b);
   const nodes = [];
   let last = null;
   for (let i = 0; i < points.length - 1; i += 1) {
     const [a, b] = [points[i], points[i + 1]];
-    const chunk = text.slice(a, b);
+    const chunk = chars.slice(a, b).join("");
     const covering = spans.filter((f) => f.start <= a && f.end >= b);
     if (!covering.length) {
       nodes.push(document.createTextNode(chunk));

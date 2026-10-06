@@ -31,7 +31,7 @@ Respond with ONE JSON object and nothing else:
   "red_flags": [{{"quote": "short EXACT quote copied from the message", "tactic": "2-4 word label", "why": "one sentence"}}],
   "safe_steps": ["2-4 concrete actions, e.g. call the person back on a number you already have"]
 }}
-Use "none" as scam_type and an empty red_flags list when the message looks legitimate. Keep red_flags to at most 5."""
+When the message looks legitimate, say so plainly in the summary, use "none" as scam_type and return an empty red_flags list. Do not invent concerns: friendly tone, small amounts and well-known payment apps between friends are normal. Keep red_flags to at most 5."""
 
 
 def _signals_block(rule_result: RuleResult, ml: MLPrediction | None) -> str:

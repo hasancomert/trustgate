@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-06T13:45:04+00:00",
+  "generated_at": "2026-10-06T13:57:51+00:00",
   "threshold": 35,
   "modes": {
     "rules": {
@@ -544,7 +544,7 @@
           "tp": 20
         },
         "scam_type_accuracy": 0.85,
-        "median_latency_ms": 41
+        "median_latency_ms": 42
       },
       "per_scenario": [
         {
@@ -810,7 +810,7 @@
           "tp": 20
         },
         "scam_type_accuracy": 0.95,
-        "median_latency_ms": 4184
+        "median_latency_ms": 5830
       },
       "per_scenario": [
         {
@@ -905,7 +905,7 @@
           "id": "S12",
           "label": "scam",
           "expected_type": "tech_support",
-          "score": 52.0,
+          "score": 56.0,
           "flagged": true,
           "predicted_type": "tech_support"
         },
@@ -913,7 +913,7 @@
           "id": "S13",
           "label": "scam",
           "expected_type": "government_impersonation",
-          "score": 57.0,
+          "score": 61.0,
           "flagged": true,
           "predicted_type": "government_impersonation"
         },
@@ -945,7 +945,7 @@
           "id": "S17",
           "label": "scam",
           "expected_type": "job_scam",
-          "score": 83.0,
+          "score": 82.0,
           "flagged": true,
           "predicted_type": "job_scam"
         },
@@ -985,7 +985,7 @@
           "id": "L02",
           "label": "legit",
           "expected_type": "none",
-          "score": 23.0,
+          "score": 20.0,
           "flagged": false,
           "predicted_type": null
         },
@@ -993,7 +993,7 @@
           "id": "L03",
           "label": "legit",
           "expected_type": "none",
-          "score": 5.0,
+          "score": 3.0,
           "flagged": false,
           "predicted_type": null
         },
@@ -1001,7 +1001,7 @@
           "id": "L04",
           "label": "legit",
           "expected_type": "none",
-          "score": 2.0,
+          "score": 0.0,
           "flagged": false,
           "predicted_type": null
         },
@@ -1009,7 +1009,7 @@
           "id": "L05",
           "label": "legit",
           "expected_type": "none",
-          "score": 5.0,
+          "score": 3.0,
           "flagged": false,
           "predicted_type": null
         },
@@ -1017,7 +1017,7 @@
           "id": "L06",
           "label": "legit",
           "expected_type": "none",
-          "score": 2.0,
+          "score": 0.0,
           "flagged": false,
           "predicted_type": null
         },
@@ -1025,7 +1025,7 @@
           "id": "L07",
           "label": "legit",
           "expected_type": "none",
-          "score": 17.0,
+          "score": 14.0,
           "flagged": false,
           "predicted_type": null
         },
@@ -1041,7 +1041,7 @@
           "id": "L09",
           "label": "legit",
           "expected_type": "none",
-          "score": 28.0,
+          "score": 30.0,
           "flagged": false,
           "predicted_type": null
         },

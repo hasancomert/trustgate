@@ -71,3 +71,12 @@ def test_module_level_verify_uses_default_gate(monkeypatch, gate):
     import trustgate.core as core
     monkeypatch.setattr(core, "_default_gate", gate)
     assert verify(VerificationRequest(message="See you soon")).verdict is Verdict.SAFE
+
+
+def test_llm_flags_hidden_when_llm_judges_message_safe(settings):
+    reply = {"risk_score": 10, "scam_type": "none", "summary": "Looks like a normal message between friends.",
+             "red_flags": [{"quote": "dinner", "tactic": "urgency", "why": "nitpick"}]}
+    gate = TrustGate(settings=settings, ml=None, analyst=LLMAnalyst(settings.llm, client=FakeClient(reply=reply)))
+    report = gate.verify(VerificationRequest(message="Your share of dinner is £20, pay me back whenever."))
+    assert report.verdict is Verdict.SAFE
+    assert not any(f.source == "llm" for f in report.red_flags)

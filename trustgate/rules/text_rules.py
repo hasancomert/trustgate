@@ -112,6 +112,7 @@ TEXT_RULES: tuple[TextRule, ...] = (
             _p(r"\b(don't|dont|do not|please don't)\s+(tell|inform|mention (this|it) to|discuss (this|it) with|involve|call|contact)\b[^.!?\n]{0,30}\b(anyone|anybody|your bank|the bank|branch staff|family|dad|mum|mom|sister|brother|son|daughter|partner|friends?|colleagues|manager|accounts|treasury|police|husband|wife|others)\b", H, unless_after=_PROTECTIVE),
             _p(r"\b(no need to|don't|do not)\s+(loop in|involve|cc|copy in)\b", H),
             _p(r"\b(confidential|discreet|discretion)\b[^.!?\n]{0,40}\b(transaction|payment|deal|acquisition|matter|request|transfer|project)\b", H),
+            _p(r"\b(this|the|your) (case|matter|investigation|transaction|request|operation) is (strictly |highly )?(confidential|secret|private|classified)\b", H),
             _p(r"\bbetween (you and me|us)\b", M),
         ),
     ),

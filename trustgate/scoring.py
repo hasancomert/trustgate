@@ -183,7 +183,8 @@ def template_summary(verdict: Verdict, scam_type: ScamType, flags: list[RedFlag]
             break
     because = f" Warning signs: {'; '.join(reasons)}." if reasons else ""
     if verdict is Verdict.DANGEROUS:
-        kind = scam_type.label.lower() if scam_type not in (ScamType.OTHER, ScamType.NONE) else "a scam or impersonation attempt"
+        label = scam_type.label
+        kind = (label if label[:2].isupper() else label[0].lower() + label[1:]) if scam_type not in (ScamType.OTHER, ScamType.NONE) else "a scam or impersonation attempt"
         return f"High risk: this matches the pattern of {kind}.{because} Do not send money or codes until you have verified the request independently."
     if verdict is Verdict.SUSPICIOUS:
         return f"Some warning signs need checking before you act.{because} Verify the sender through a channel you already trust."

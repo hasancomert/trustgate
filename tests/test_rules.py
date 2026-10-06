@@ -213,3 +213,8 @@ def test_remote_access_needs_context(engine):
     assert "text.remote_access" not in ids(run(engine, "The new TV ships with a voice remote control."))
     assert "text.remote_access" in ids(run(engine, "Please install AnyDesk so our technician can fix it."))
     assert "text.remote_access" in ids(run(engine, "We need remote access to your computer to stop the hackers."))
+
+
+def test_confidential_case_is_secrecy(engine):
+    assert "text.secrecy" in ids(run(engine, "Do not tell anyone, this case is confidential."))
+    assert "text.secrecy" not in ids(run(engine, "This email and any attachments may contain confidential information."))
