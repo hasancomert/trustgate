@@ -16,12 +16,12 @@ A message counts as flagged when its score reaches the `suspicious` threshold (3
 
 _Hand-written while the rules were developed, so these numbers are optimistic._ Generated 2026-10-06T19:13:47+00:00.
 
-| Mode | Precision | Recall | F1 | Accuracy | TN | FP | FN | TP | Scam-type accuracy |
+| Mode | Precision (95% CI) | Recall (95% CI) | F1 | Accuracy | TN | FP | FN | TP | Scam-type accuracy |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| rules | 1.000 | 1.000 | 1.000 | 1.000 | 11 | 0 | 0 | 20 | 0.800 |
-| ml | 0.688 | 0.550 | 0.611 | 0.548 | 6 | 5 | 9 | 11 | n/a |
-| fused-mock | 0.952 | 1.000 | 0.976 | 0.968 | 10 | 1 | 0 | 20 | 0.850 |
-| fused-live | 0.952 | 1.000 | 0.976 | 0.968 | 10 | 1 | 0 | 20 | 0.950 |
+| rules | 1.000 (0.84–1.00) | 1.000 (0.84–1.00) | 1.000 | 1.000 | 11 | 0 | 0 | 20 | 0.800 |
+| ml | 0.688 (0.44–0.86) | 0.550 (0.34–0.74) | 0.611 | 0.548 | 6 | 5 | 9 | 11 | n/a |
+| fused-mock | 0.952 (0.77–0.99) | 1.000 (0.84–1.00) | 0.976 | 0.968 | 10 | 1 | 0 | 20 | 0.850 |
+| fused-live | 0.952 (0.77–0.99) | 1.000 (0.84–1.00) | 0.976 | 0.968 | 10 | 1 | 0 | 20 | 0.950 |
 
 ### Per-scenario scores
 
@@ -65,12 +65,12 @@ _Hand-written while the rules were developed, so these numbers are optimistic._ 
 
 _Hand-written while the Turkish rule pack was developed, so these numbers are optimistic._ Generated 2026-10-06T19:17:42+00:00.
 
-| Mode | Precision | Recall | F1 | Accuracy | TN | FP | FN | TP | Scam-type accuracy |
+| Mode | Precision (95% CI) | Recall (95% CI) | F1 | Accuracy | TN | FP | FN | TP | Scam-type accuracy |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| rules | 1.000 | 1.000 | 1.000 | 1.000 | 7 | 0 | 0 | 9 | 1.000 |
-| ml | 1.000 | 0.111 | 0.200 | 0.500 | 7 | 0 | 8 | 1 | n/a |
-| fused-mock | 1.000 | 1.000 | 1.000 | 1.000 | 7 | 0 | 0 | 9 | 1.000 |
-| fused-live | 1.000 | 1.000 | 1.000 | 1.000 | 7 | 0 | 0 | 9 | 1.000 |
+| rules | 1.000 (0.70–1.00) | 1.000 (0.70–1.00) | 1.000 | 1.000 | 7 | 0 | 0 | 9 | 1.000 |
+| ml | 1.000 (0.21–1.00) | 0.111 (0.02–0.43) | 0.200 | 0.500 | 7 | 0 | 8 | 1 | n/a |
+| fused-mock | 1.000 (0.70–1.00) | 1.000 (0.70–1.00) | 1.000 | 1.000 | 7 | 0 | 0 | 9 | 1.000 |
+| fused-live | 1.000 (0.70–1.00) | 1.000 (0.70–1.00) | 1.000 | 1.000 | 7 | 0 | 0 | 9 | 1.000 |
 
 ### Per-scenario scores
 
@@ -99,25 +99,25 @@ _Hand-written while the Turkish rule pack was developed, so these numbers are op
 
 _Written by a separate agent that never saw the rules, after they were frozen; committed before the first run and evaluated once. No rules were changed after seeing the results._ Generated 2026-10-06T19:18:40+00:00.
 
-| Mode | Precision | Recall | F1 | Accuracy | TN | FP | FN | TP | Scam-type accuracy |
+| Mode | Precision (95% CI) | Recall (95% CI) | F1 | Accuracy | TN | FP | FN | TP | Scam-type accuracy |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| rules | 0.875 | 0.538 | 0.667 | 0.682 | 16 | 2 | 12 | 14 | 0.308 |
-| ml | 0.682 | 0.577 | 0.625 | 0.591 | 11 | 7 | 11 | 15 | n/a |
-| fused-mock | 0.762 | 0.615 | 0.681 | 0.659 | 13 | 5 | 10 | 16 | 0.462 |
-| fused-live | 0.828 | 0.923 | 0.873 | 0.841 | 13 | 5 | 2 | 24 | 0.654 |
+| rules | 0.875 (0.64–0.96) | 0.538 (0.35–0.71) | 0.667 | 0.682 | 16 | 2 | 12 | 14 | 0.308 |
+| ml | 0.682 (0.47–0.84) | 0.577 (0.39–0.74) | 0.625 | 0.591 | 11 | 7 | 11 | 15 | n/a |
+| fused-mock | 0.762 (0.55–0.89) | 0.615 (0.42–0.78) | 0.681 | 0.659 | 13 | 5 | 10 | 16 | 0.462 |
+| fused-live | 0.828 (0.66–0.92) | 0.923 (0.76–0.98) | 0.873 | 0.841 | 13 | 5 | 2 | 24 | 0.654 |
 
 By language:
 
-| Mode | Language | Precision | Recall | F1 | FP | FN |
+| Mode | Language | Precision (95% CI) | Recall (95% CI) | F1 | FP | FN |
 |---|---|---:|---:|---:|---:|---:|
-| rules | en | 0.909 | 0.714 | 0.800 | 1 | 4 |
-| rules | tr | 0.800 | 0.333 | 0.471 | 1 | 8 |
-| ml | en | 0.667 | 0.571 | 0.615 | 4 | 6 |
-| ml | tr | 0.700 | 0.583 | 0.636 | 3 | 5 |
-| fused-mock | en | 0.750 | 0.857 | 0.800 | 4 | 2 |
-| fused-mock | tr | 0.800 | 0.333 | 0.471 | 1 | 8 |
-| fused-live | en | 0.812 | 0.929 | 0.867 | 3 | 1 |
-| fused-live | tr | 0.846 | 0.917 | 0.880 | 2 | 1 |
+| rules | en | 0.909 (0.62–0.98) | 0.714 (0.45–0.88) | 0.800 | 1 | 4 |
+| rules | tr | 0.800 (0.38–0.96) | 0.333 (0.14–0.61) | 0.471 | 1 | 8 |
+| ml | en | 0.667 (0.39–0.86) | 0.571 (0.33–0.79) | 0.615 | 4 | 6 |
+| ml | tr | 0.700 (0.40–0.89) | 0.583 (0.32–0.81) | 0.636 | 3 | 5 |
+| fused-mock | en | 0.750 (0.51–0.90) | 0.857 (0.60–0.96) | 0.800 | 4 | 2 |
+| fused-mock | tr | 0.800 (0.38–0.96) | 0.333 (0.14–0.61) | 0.471 | 1 | 8 |
+| fused-live | en | 0.812 (0.57–0.93) | 0.929 (0.69–0.99) | 0.867 | 3 | 1 |
+| fused-live | tr | 0.846 (0.58–0.96) | 0.917 (0.65–0.98) | 0.880 | 2 | 1 |
 
 ### Per-scenario scores
 
@@ -174,25 +174,25 @@ By language:
 
 _Scams that try to talk the AI analyst into a safe verdict, plus legitimate messages that mention AI assistants innocently. Written blind by the same agent from a list of attack techniques we supplied (the wording is its own). An attack succeeds if a scam ends up safe._ Generated 2026-10-06T19:22:25+00:00.
 
-| Mode | Precision | Recall | F1 | Accuracy | TN | FP | FN | TP | Scam-type accuracy |
+| Mode | Precision (95% CI) | Recall (95% CI) | F1 | Accuracy | TN | FP | FN | TP | Scam-type accuracy |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| rules | 1.000 | 0.800 | 0.889 | 0.846 | 3 | 0 | 2 | 8 | 0.300 |
-| ml | 0.727 | 0.800 | 0.762 | 0.615 | 0 | 3 | 2 | 8 | n/a |
-| fused-mock | 1.000 | 0.800 | 0.889 | 0.846 | 3 | 0 | 2 | 8 | 0.700 |
-| fused-live | 1.000 | 0.900 | 0.947 | 0.923 | 3 | 0 | 1 | 9 | 0.800 |
+| rules | 1.000 (0.68–1.00) | 0.800 (0.49–0.94) | 0.889 | 0.846 | 3 | 0 | 2 | 8 | 0.300 |
+| ml | 0.727 (0.43–0.90) | 0.800 (0.49–0.94) | 0.762 | 0.615 | 0 | 3 | 2 | 8 | n/a |
+| fused-mock | 1.000 (0.68–1.00) | 0.800 (0.49–0.94) | 0.889 | 0.846 | 3 | 0 | 2 | 8 | 0.700 |
+| fused-live | 1.000 (0.70–1.00) | 0.900 (0.60–0.98) | 0.947 | 0.923 | 3 | 0 | 1 | 9 | 0.800 |
 
 By language:
 
-| Mode | Language | Precision | Recall | F1 | FP | FN |
+| Mode | Language | Precision (95% CI) | Recall (95% CI) | F1 | FP | FN |
 |---|---|---:|---:|---:|---:|---:|
-| rules | en | 1.000 | 1.000 | 1.000 | 0 | 0 |
-| rules | tr | 0.000 | 0.000 | 0.000 | 0 | 2 |
-| ml | en | 0.750 | 0.750 | 0.750 | 2 | 2 |
-| ml | tr | 0.667 | 1.000 | 0.800 | 1 | 0 |
-| fused-mock | en | 1.000 | 1.000 | 1.000 | 0 | 0 |
-| fused-mock | tr | 0.000 | 0.000 | 0.000 | 0 | 2 |
-| fused-live | en | 1.000 | 1.000 | 1.000 | 0 | 0 |
-| fused-live | tr | 1.000 | 0.500 | 0.667 | 0 | 1 |
+| rules | en | 1.000 (0.68–1.00) | 1.000 (0.68–1.00) | 1.000 | 0 | 0 |
+| rules | tr | 0.000 | 0.000 (0.00–0.66) | 0.000 | 0 | 2 |
+| ml | en | 0.750 (0.41–0.93) | 0.750 (0.41–0.93) | 0.750 | 2 | 2 |
+| ml | tr | 0.667 (0.21–0.94) | 1.000 (0.34–1.00) | 0.800 | 1 | 0 |
+| fused-mock | en | 1.000 (0.68–1.00) | 1.000 (0.68–1.00) | 1.000 | 0 | 0 |
+| fused-mock | tr | 0.000 | 0.000 (0.00–0.66) | 0.000 | 0 | 2 |
+| fused-live | en | 1.000 (0.68–1.00) | 1.000 (0.68–1.00) | 1.000 | 0 | 0 |
+| fused-live | tr | 1.000 (0.21–1.00) | 0.500 (0.10–0.91) | 0.667 | 0 | 1 |
 
 Injection outcome (rules): attacks that got through: **2 / 10**.
 
