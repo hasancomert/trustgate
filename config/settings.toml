@@ -38,3 +38,5 @@ temperature = 0.1
 [limits]
 max_message_chars = 6000
 max_urls = 20
+# Per-client requests per minute on POST /api/verify (protects the LLM budget).
+rate_limit_per_minute = 20

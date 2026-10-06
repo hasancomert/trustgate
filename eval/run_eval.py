@@ -1,9 +1,15 @@
 #!/usr/bin/env python3
 """Evaluate TrustGate layers on hand-written scenarios + summarize held-out ML metrics.
 
+Modes:
+    rules       rule engine only (score = max(rule score, floor))
+    ml          TF-IDF + LR only (score = P(spam) * 100)
+    fused-mock  full verify() with the LLM layer in mock mode (rules + ML)
+    fused-live  full verify() calling the configured LLM (costs API credits)
+
 Usage:
-    python eval/run_eval.py                 # all offline modes
-    python eval/run_eval.py --modes rules,ml
+    python eval/run_eval.py                                  # offline modes
+    python eval/run_eval.py --modes rules,ml,fused-mock,fused-live
 
 Writes eval/results/scenarios.json and eval/results/SUMMARY.md.
 """
@@ -18,6 +24,7 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
 
+from trustgate import TrustGate
 from trustgate.config import PROJECT_ROOT, get_settings
 from trustgate.ml import MLClassifier
 from trustgate.rules import build_engine
@@ -49,6 +56,7 @@ class Outcome:
     score: float
     flagged: bool
     scam_type: str | None = None
+    latency_ms: int | None = None
 
 
 Runner = Callable[[VerificationRequest], Outcome]
@@ -94,6 +102,22 @@ def build_runners(modes: list[str]) -> dict[str, Runner]:
                 return Outcome(p.score, p.probability >= 0.5)
 
             runners["ml"] = ml
+
+    for mode in ("fused-mock", "fused-live"):
+        if mode not in modes:
+            continue
+        mode_settings = settings.model_copy(deep=True)
+        mode_settings.llm.mode = "mock" if mode == "fused-mock" else "live"
+        gate = TrustGate(settings=mode_settings)
+
+        def fused(req: VerificationRequest, gate: TrustGate = gate) -> Outcome:
+            r = gate.verify(req)
+            if r.signals.llm.status == "fallback":
+                print(f"! LLM fallback: {r.signals.llm.detail}", file=sys.stderr)
+            kind = None if r.scam_type is ScamType.NONE else r.scam_type.value
+            return Outcome(float(r.risk_score), r.risk_score >= threshold, kind, r.latency_ms)
+
+        runners[mode] = fused
     return runners
 
 
@@ -115,6 +139,9 @@ def metrics(scenarios: list[Scenario], outcomes: list[Outcome]) -> dict:
     if any(o.scam_type is not None for o in outcomes):
         n_scams = sum(s.is_scam for s in scenarios)
         result["scam_type_accuracy"] = round(type_hits / n_scams, 3) if n_scams else None
+    latencies = [o.latency_ms for o in outcomes if o.latency_ms is not None]
+    if latencies:
+        result["median_latency_ms"] = sorted(latencies)[len(latencies) // 2]
     return result
 
 
@@ -169,7 +196,7 @@ def write_summary(results: dict, scenarios: list[Scenario]) -> str:
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("--modes", default="rules,ml", help="comma-separated modes")
+    parser.add_argument("--modes", default="rules,ml,fused-mock", help="comma-separated modes (add fused-live to call the LLM)")
     args = parser.parse_args(argv)
 
     scenarios = load_scenarios()

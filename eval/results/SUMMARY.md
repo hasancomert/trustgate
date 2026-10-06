@@ -1,6 +1,6 @@
 # Evaluation summary
 
-_Generated 2026-10-06T13:26:34+00:00_
+_Generated 2026-10-06T13:33:04+00:00_
 
 ## ML layer: held-out test split
 
@@ -20,41 +20,43 @@ A message counts as flagged when its score reaches the `suspicious` threshold (3
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
 | rules | 1.000 | 1.000 | 1.000 | 1.000 | 11 | 0 | 0 | 20 | 0.800 |
 | ml | 0.688 | 0.550 | 0.611 | 0.548 | 6 | 5 | 9 | 11 | n/a |
+| fused-mock | 0.952 | 1.000 | 0.976 | 0.968 | 10 | 1 | 0 | 20 | 0.850 |
+| fused-live | 1.000 | 1.000 | 1.000 | 1.000 | 11 | 0 | 0 | 20 | 0.950 |
 
 ### Per-scenario scores
 
-| ID | Label | Expected type | rules | ml |
-|---|---|---|---:|---:|
-| S01 | scam | family_impersonation | 85 | 2⚠ |
-| S02 | scam | family_impersonation | 80 | 2⚠ |
-| S03 | scam | ceo_invoice_fraud | 90 | 1⚠ |
-| S04 | scam | ceo_invoice_fraud | 86 | 45⚠ |
-| S05 | scam | ceo_invoice_fraud | 80 | 1⚠ |
-| S06 | scam | fake_delivery | 80 | 34⚠ |
-| S07 | scam | fake_delivery | 80 | 82 |
-| S08 | scam | bank_impersonation | 53 | 97 |
-| S09 | scam | bank_impersonation | 71 | 74 |
-| S10 | scam | account_phishing | 60 | 85 |
-| S11 | scam | account_phishing | 70 | 84 |
-| S12 | scam | tech_support | 51 | 34⚠ |
-| S13 | scam | government_impersonation | 36 | 75 |
-| S14 | scam | government_impersonation | 80 | 68 |
-| S15 | scam | investment_scam | 80 | 88 |
-| S16 | scam | romance_scam | 80 | 8⚠ |
-| S17 | scam | job_scam | 80 | 100 |
-| S18 | scam | marketplace_scam | 80 | 17⚠ |
-| S19 | scam | prize_lottery | 81 | 99 |
-| S20 | scam | other | 88 | 75 |
-| L01 | legit | none | 0 | 87⚠ |
-| L02 | legit | none | 0 | 80⚠ |
-| L03 | legit | none | 0 | 7 |
-| L04 | legit | none | 0 | 0 |
-| L05 | legit | none | 0 | 6 |
-| L06 | legit | none | 0 | 2 |
-| L07 | legit | none | 0 | 51⚠ |
-| L08 | legit | none | 18 | 99⚠ |
-| L09 | legit | none | 25 | 50 |
-| L10 | legit | none | 0 | 84⚠ |
-| L11 | legit | none | 18 | 15 |
+| ID | Label | Expected type | rules | ml | fused-mock | fused-live |
+|---|---|---|---:|---:|---:|---:|
+| S01 | scam | family_impersonation | 85 | 2⚠ | 80 | 80 |
+| S02 | scam | family_impersonation | 80 | 2⚠ | 80 | 80 |
+| S03 | scam | ceo_invoice_fraud | 90 | 1⚠ | 80 | 80 |
+| S04 | scam | ceo_invoice_fraud | 86 | 45⚠ | 80 | 80 |
+| S05 | scam | ceo_invoice_fraud | 80 | 1⚠ | 80 | 80 |
+| S06 | scam | fake_delivery | 80 | 34⚠ | 80 | 80 |
+| S07 | scam | fake_delivery | 80 | 82 | 80 | 81 |
+| S08 | scam | bank_impersonation | 53 | 97 | 66 | 69 |
+| S09 | scam | bank_impersonation | 71 | 74 | 72 | 77 |
+| S10 | scam | account_phishing | 60 | 85 | 67 | 70 |
+| S11 | scam | account_phishing | 70 | 84 | 70 | 70 |
+| S12 | scam | tech_support | 51 | 34⚠ | 46 | 52 |
+| S13 | scam | government_impersonation | 36 | 75 | 48 | 61 |
+| S14 | scam | government_impersonation | 80 | 68 | 80 | 80 |
+| S15 | scam | investment_scam | 80 | 88 | 80 | 83 |
+| S16 | scam | romance_scam | 80 | 8⚠ | 80 | 80 |
+| S17 | scam | job_scam | 80 | 100 | 80 | 82 |
+| S18 | scam | marketplace_scam | 80 | 17⚠ | 80 | 80 |
+| S19 | scam | prize_lottery | 81 | 99 | 86 | 88 |
+| S20 | scam | other | 88 | 75 | 84 | 88 |
+| L01 | legit | none | 0 | 87⚠ | 27 | 24 |
+| L02 | legit | none | 0 | 80⚠ | 25 | 23 |
+| L03 | legit | none | 0 | 7 | 2 | 3 |
+| L04 | legit | none | 0 | 0 | 0 | 2 |
+| L05 | legit | none | 0 | 6 | 2 | 5 |
+| L06 | legit | none | 0 | 2 | 1 | 2 |
+| L07 | legit | none | 0 | 51⚠ | 16 | 17 |
+| L08 | legit | none | 18 | 99⚠ | 43⚠ | 31 |
+| L09 | legit | none | 25 | 50 | 32 | 24 |
+| L10 | legit | none | 0 | 84⚠ | 26 | 24 |
+| L11 | legit | none | 18 | 15 | 17 | 18 |
 
 ⚠ = misclassified at the flagging threshold.

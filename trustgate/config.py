@@ -85,6 +85,7 @@ class LLMSettings(BaseModel):
 class LimitSettings(BaseModel):
     max_message_chars: int = Field(gt=0)
     max_urls: int = Field(gt=0)
+    rate_limit_per_minute: int = Field(default=20, ge=0, description="0 disables rate limiting.")
 
 
 class Settings(BaseModel):
