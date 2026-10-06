@@ -2,7 +2,7 @@
   "set": "dev",
   "title": "Development scenarios (English)",
   "note": "Hand-written while the rules were developed, so these numbers are optimistic.",
-  "generated_at": "2026-10-06T18:19:31+00:00",
+  "generated_at": "2026-10-06T19:13:47+00:00",
   "threshold": 35,
   "modes": {
     "rules": {
@@ -733,7 +733,7 @@
           "tp": 20
         },
         "scam_type_accuracy": 0.85,
-        "median_latency_ms": 40
+        "median_latency_ms": 41
       },
       "per_scenario": [
         {
@@ -1092,7 +1092,7 @@
           "tp": 20
         },
         "scam_type_accuracy": 0.95,
-        "median_latency_ms": 8129
+        "median_latency_ms": 7030
       },
       "per_scenario": [
         {
@@ -1114,7 +1114,7 @@
           "score": 80.0,
           "flagged": true,
           "predicted_type": "family_impersonation",
-          "llm_score": 90.0,
+          "llm_score": 75.0,
           "llm_status": "ok"
         },
         {
@@ -1133,10 +1133,10 @@
           "lang": "en",
           "label": "scam",
           "expected_type": "ceo_invoice_fraud",
-          "score": 64.0,
+          "score": 71.0,
           "flagged": true,
           "predicted_type": "ceo_invoice_fraud",
-          "llm_score": 65.0,
+          "llm_score": 85.0,
           "llm_status": "ok"
         },
         {
@@ -1147,7 +1147,7 @@
           "score": 80.0,
           "flagged": true,
           "predicted_type": "ceo_invoice_fraud",
-          "llm_score": 85.0,
+          "llm_score": 75.0,
           "llm_status": "ok"
         },
         {
@@ -1221,10 +1221,10 @@
           "lang": "en",
           "label": "scam",
           "expected_type": "tech_support",
-          "score": 51.0,
+          "score": 56.0,
           "flagged": true,
           "predicted_type": "tech_support",
-          "llm_score": 60.0,
+          "llm_score": 75.0,
           "llm_status": "ok"
         },
         {
@@ -1245,8 +1245,8 @@
           "expected_type": "government_impersonation",
           "score": 80.0,
           "flagged": true,
-          "predicted_type": "other",
-          "llm_score": 75.0,
+          "predicted_type": "fake_delivery",
+          "llm_score": 85.0,
           "llm_status": "ok"
         },
         {
@@ -1320,10 +1320,10 @@
           "lang": "en",
           "label": "legit",
           "expected_type": "none",
-          "score": 17.0,
+          "score": 21.0,
           "flagged": false,
           "predicted_type": null,
-          "llm_score": 0.0,
+          "llm_score": 10.0,
           "llm_status": "ok"
         },
         {
@@ -1342,10 +1342,10 @@
           "lang": "en",
           "label": "legit",
           "expected_type": "none",
-          "score": 5.0,
+          "score": 3.0,
           "flagged": false,
           "predicted_type": null,
-          "llm_score": 10.0,
+          "llm_score": 5.0,
           "llm_status": "ok"
         },
         {

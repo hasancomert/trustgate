@@ -296,6 +296,31 @@ TEXT_RULES: tuple[TextRule, ...] = (
             _p(r"\b(this|the) (message|payment|transaction|request|invoice) (is|has been) (pre-?)?(verified|approved|whitelisted|authori[sz]ed|cleared) by\b", H),
             _p(r"\b(do not|don't|never)\s+(flag|report|warn|alert|verify|double-check|question)\b", H),
             _p(r"\b(auto-?approve|approve (this|the) (payment|transfer|purchase) (without|immediately|automatically))\b", H),
+            # Completing a payment while keeping the account owner out of it.
+            _p(r"\b(approve|confirm|complete|process|authori[sz]e|pay|execute)\s+(this\s+|the\s+)?(payment|transfer|purchase|order|invoice|transaction)?\s*(without|w/o)\s+(asking|checking|consulting|confirm\w*|verif\w*|approval|consent|review\w*|the user|the customer|user|customer)\b", H),
+            _p(r"\b(do not|don't|never|no need to)\s+(ask|check with|confirm with|consult|notify|inform|alert|wait for)\s+(the\s+|your\s+)?(user|customer|account (holder|owner)|human|principal)s?\b", H),
+            # A ready-made verdict for the checker: '"risk_score": 0', 'verdict: safe'.
+            _p(r"\b(risk_?score|scam_?type|is_?scam|is_?phishing|is_?fraud|fraud_?score|spam_?score)\b[\"']?\s*[:=]\s*[\"']?(0|none|false|safe|legit\w*|benign|clean|low)\b", C),
+            _p(r"\b(verdict|classification|assessment)\b[\"']?\s*[:=]\s*[\"']?(safe|legit\w*|genuine|benign|not[ _-]?(a[ _-]?)?(scam|phishing|fraud))\b", H),
+            _p(r"\b(respond|reply|answer|output|return)\s+(only\s+|exactly\s+|just\s+)?(with\s+)?(the following|this|exactly)?\s*(json|verdict|risk score|classification)\b", H),
+            # Closing the checker's input block, or opening a fake instruction block.
+            _p(r"<\s*/\s*(message|system|assistant|user|instructions?|prompt|context|input|email)\s*>", C),
+            _p(r"<\s*(system|assistant|instructions?|prompt)\s*>", C),
+            _p(r"(={3,}|-{3,}|\*{3,}|#{3,}|\[)\s*end of (the )?(message|email|input|user input|document|transcript|conversation)\b", M),
+            _p(r"\bnew (system )?instructions?\s*:", M),
+            # Fake system or developer notes.
+            _p(r"\[\s*(system|developer|admin)\s+(override|instructions?|prompt)\s*\]|\b(system (override|instructions?|prompt)|developer (instructions?|override)|admin override)\s*:", C),
+            _p(r"\[\s*(system|developer)\s*\]|\bdeveloper (note|message)\s*:", H),
+            # Role play and hypotheticals that ask the checker to pretend.
+            _p(r"\b(pretend|act as if|role-?play|hypothetically|for (a|this|the) (training|test|testing|demo|research) (exercise|purpose|scenario)s?)\b[^.!?\n]{0,60}\b(safe|legit(imate)?|genuine|verified|harmless|trusted|not (a )?(scam|fraud|phishing))\b", H),
+            # Speaking to the checker directly, with flattery or invented policy.
+            _p(r"\b(note|message|instructions?|attention|reminder|notice)\s+(to|for)\s+(the\s+|any\s+|all\s+)?(ai|a\.i\.|bots?|llms?|language models?|automated (systems?|checkers?|reviewers?|filters?|agents?|assistants?)|(shopping|payment|purchasing|virtual|digital) (assistants?|agents?))\b", H),
+            _p(r"\bas an? (responsible|helpful|trustworthy|good|smart|advanced|honest|ethical|well-aligned)\s+(ai|ai assistant|assistant|language model|llm|chatbot)\b", H),
+            _p(r"\b(flagging|blocking|reporting|warning about|questioning|delaying)\s+(this|it|verified|trusted|approved|partner)\w*\b[^.!?\n]{0,40}\b(violat\w*|against|breach\w*)\s+(your\s+|the\s+|our\s+)?(policy|policies|guidelines|terms|rules)\b", H),
+            # Encoded payloads with an instruction to decode them.
+            _p(r"\b(decode|base64)\b[^\n]{0,60}?(?<![\w/.:-])[A-Za-z0-9+]{20,}={0,2}(?![\w/.])", H),
         ),
     ),
 )
+
+AGENT_RULE_ID = "text.agent_manipulation"

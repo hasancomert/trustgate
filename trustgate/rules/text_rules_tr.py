@@ -162,9 +162,15 @@ TR_PATTERNS: dict[str, tuple[Pattern, ...]] = {
     ),
     "text.agent_manipulation": (
         _p(r"\b(onceki|tum|butun)\s+(talimat\w*|komut\w*|kural\w*)\s+(yok say\w*|gormezden gel\w*|unut\w*|dikkate alma\w*)", C),
-        _p(r"\b(yapay zeka|asistan\w*|bot|ajan\w*)\b[^.!?\n]{0,40}\b(guvenli|onayli|dogrulanmis|mesru)\s+(olarak\s+)?(isaretle\w*|kabul et\w*|degerlendir\w*)", C),
-        _p(r"\b(kullaniciya|musteriye)\s+(sormadan|danismadan|haber vermeden)\b", H),
+        _p(r"\b(yapay zeka|asistan\w*|bot|ajan\w*)\b[^.!?\n]{0,40}\b(guvenli|onayli|dogrulanmis|mesru)\s+(olarak\s+)?(isaretle\w*|kabul et\w*|degerlendir\w*|siniflandir\w*|raporla\w*)", C),
+        _p(r"\b(kullaniciya|musteriye|hesap sahibine)\s+(sormadan|danismadan|haber vermeden|onay almadan)\b", H),
         _p(r"\b(onaylanmistir|dogrulanmistir|onceden onaylan\w*)\b[^.!?\n]{0,40}\b(sormadan|onay almadan|hemen tamamla\w*)", H),
+        _p(r"\b(onay|dogrulama)\s+(beklemeden|istemeden)\b", H),
+        # Speaking to the checker: "yapay zeka asistanlarına not", "sorumlu bir yapay zeka olarak".
+        _p(r"\b(yapay zeka|asistan\w*|ajan\w*)\b[^.!?\n]{0,20}\b(not|notu|dikkatine|talimat\w*)\b", H),
+        _p(r"\b(sorumlu|iyi|yardimsever|durust|etik)\s+bir\s+(yapay zeka|asistan|dil modeli)\s+olarak\b", H),
+        _p(r"\b(gelistirici modu|sistem talimat\w*|sistem istem\w*)\b", C),
+        _p(r"\b(egitim|test|deneme) amacli\b[^.!?\n]{0,60}\b(guvenli|mesru|gercek|dogrulanmis|zararsiz)\b", H),
     ),
 }
 

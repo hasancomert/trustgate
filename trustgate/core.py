@@ -10,6 +10,7 @@ import logging
 import threading
 import time
 import uuid
+from dataclasses import replace
 
 from trustgate import __version__
 from trustgate.config import Settings, get_settings
@@ -17,7 +18,7 @@ from trustgate.lang import is_turkish
 from trustgate.llm import LLMAnalyst, LLMOutcome
 from trustgate.ml import MLClassifier
 from trustgate.rules import build_engine
-from trustgate.schemas import RiskReport, VerificationRequest
+from trustgate.schemas import RiskReport, VerificationRequest, Verdict
 from trustgate.scoring import ACTIONS, fuse, merge_flags, resolve_scam_type, safe_steps, template_summary, verdict_for
 
 logger = logging.getLogger(__name__)
@@ -69,9 +70,18 @@ class TrustGate:
             signals.ml.status = "skipped"
             signals.ml.detail = "The text classifier is English-only, so it was skipped for this Turkish message."
         verdict = verdict_for(score, self.settings.scoring.thresholds)
+        suspicious = self.settings.scoring.thresholds.suspicious
+        # The analyst's words are only used when its own judgement agrees with the final verdict:
+        # a fooled analyst ("this is fine") must not explain a message the other layers flag.
+        if llm.score is not None and (llm.score >= suspicious) != (verdict is not Verdict.SAFE):
+            signals.llm.detail = (
+                f"Overruled: the AI analyst scored this {llm.score:.0f}, but the other layers outweighed it, "
+                "so its explanation is not used."
+            )
+            llm = replace(llm, analysis=None, grounded_flags=[])
         scam_type = resolve_scam_type(verdict, rule_result, llm)
         # LLM phrases are only shown when the analyst itself judges the message risky.
-        llm_flags = llm.grounded_flags if llm.score is not None and llm.score >= self.settings.scoring.thresholds.suspicious else []
+        llm_flags = llm.grounded_flags if llm.score is not None and llm.score >= suspicious else []
         flags = merge_flags(rule_result.red_flags, llm_flags)
         summary = llm.analysis.summary if llm.status == "ok" and llm.analysis else template_summary(verdict, scam_type, flags)
 
