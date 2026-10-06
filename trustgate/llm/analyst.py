@@ -94,6 +94,7 @@ class LLMOutcome:
     grounded_flags: list[RedFlag] = field(default_factory=list)
     detail: str | None = None
     latency_ms: int = 0
+    cached: bool = False
 
     @property
     def score(self) -> float | None:
@@ -151,7 +152,7 @@ class LLMAnalyst:
                 self._cache.move_to_end(key)
         if cached:
             analysis, model = cached
-            return LLMOutcome(status="ok", model=model, analysis=analysis, grounded_flags=ground_flags(request.message, analysis.red_flags), detail="cached")
+            return LLMOutcome(status="ok", model=model, analysis=analysis, grounded_flags=ground_flags(request.message, analysis.red_flags), cached=True)
 
         try:
             client = self._get_client()

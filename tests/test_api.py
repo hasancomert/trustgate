@@ -68,3 +68,25 @@ def test_rate_limiter_window():
 
 def test_docs_are_served(client):
     assert client.get("/openapi.json").status_code == 200
+
+
+def test_examples_are_valid_requests(client):
+    from trustgate.schemas import VerificationRequest
+    items = client.get("/api/examples").json()
+    assert [i["id"] for i in items] == ["dangerous", "suspicious", "safe"]
+    for item in items:
+        VerificationRequest.model_validate(item["request"])
+
+
+def test_demo_examples_produce_their_verdicts_offline(client):
+    for item in client.get("/api/examples").json():
+        body = client.post("/api/verify", json=item["request"]).json()
+        assert body["verdict"] == item["expected"], (item["id"], body["risk_score"])
+
+
+def test_index_and_static_assets(client):
+    r = client.get("/")
+    assert r.status_code == 200 and "TrustGate" in r.text
+    assert "default-src 'self'" in r.headers["Content-Security-Policy"]
+    for asset in ("/static/app.js", "/static/styles.css", "/static/favicon.svg"):
+        assert client.get(asset).status_code == 200

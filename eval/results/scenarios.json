@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-06T13:33:04+00:00",
+  "generated_at": "2026-10-06T13:45:04+00:00",
   "threshold": 35,
   "modes": {
     "rules": {
@@ -45,7 +45,7 @@
           "id": "S04",
           "label": "scam",
           "expected_type": "ceo_invoice_fraud",
-          "score": 85.9,
+          "score": 71.9,
           "flagged": true,
           "predicted_type": "ceo_invoice_fraud"
         },
@@ -544,7 +544,7 @@
           "tp": 20
         },
         "scam_type_accuracy": 0.85,
-        "median_latency_ms": 40
+        "median_latency_ms": 41
       },
       "per_scenario": [
         {
@@ -575,7 +575,7 @@
           "id": "S04",
           "label": "scam",
           "expected_type": "ceo_invoice_fraud",
-          "score": 80.0,
+          "score": 64.0,
           "flagged": true,
           "predicted_type": "ceo_invoice_fraud"
         },
@@ -799,18 +799,18 @@
     },
     "fused-live": {
       "metrics": {
-        "precision": 1.0,
+        "precision": 0.952,
         "recall": 1.0,
-        "f1": 1.0,
-        "accuracy": 1.0,
+        "f1": 0.976,
+        "accuracy": 0.968,
         "confusion_matrix": {
-          "tn": 11,
-          "fp": 0,
+          "tn": 10,
+          "fp": 1,
           "fn": 0,
           "tp": 20
         },
         "scam_type_accuracy": 0.95,
-        "median_latency_ms": 4606
+        "median_latency_ms": 4184
       },
       "per_scenario": [
         {
@@ -841,7 +841,7 @@
           "id": "S04",
           "label": "scam",
           "expected_type": "ceo_invoice_fraud",
-          "score": 80.0,
+          "score": 71.0,
           "flagged": true,
           "predicted_type": "ceo_invoice_fraud"
         },
@@ -913,7 +913,7 @@
           "id": "S13",
           "label": "scam",
           "expected_type": "government_impersonation",
-          "score": 61.0,
+          "score": 57.0,
           "flagged": true,
           "predicted_type": "government_impersonation"
         },
@@ -929,7 +929,7 @@
           "id": "S15",
           "label": "scam",
           "expected_type": "investment_scam",
-          "score": 83.0,
+          "score": 80.0,
           "flagged": true,
           "predicted_type": "investment_scam"
         },
@@ -945,7 +945,7 @@
           "id": "S17",
           "label": "scam",
           "expected_type": "job_scam",
-          "score": 82.0,
+          "score": 83.0,
           "flagged": true,
           "predicted_type": "job_scam"
         },
@@ -961,7 +961,7 @@
           "id": "S19",
           "label": "scam",
           "expected_type": "prize_lottery",
-          "score": 88.0,
+          "score": 82.0,
           "flagged": true,
           "predicted_type": "prize_lottery"
         },
@@ -977,7 +977,7 @@
           "id": "L01",
           "label": "legit",
           "expected_type": "none",
-          "score": 24.0,
+          "score": 21.0,
           "flagged": false,
           "predicted_type": null
         },
@@ -993,7 +993,7 @@
           "id": "L03",
           "label": "legit",
           "expected_type": "none",
-          "score": 3.0,
+          "score": 5.0,
           "flagged": false,
           "predicted_type": null
         },
@@ -1033,15 +1033,15 @@
           "id": "L08",
           "label": "legit",
           "expected_type": "none",
-          "score": 31.0,
-          "flagged": false,
-          "predicted_type": null
+          "score": 35.0,
+          "flagged": true,
+          "predicted_type": "other"
         },
         {
           "id": "L09",
           "label": "legit",
           "expected_type": "none",
-          "score": 24.0,
+          "score": 28.0,
           "flagged": false,
           "predicted_type": null
         },

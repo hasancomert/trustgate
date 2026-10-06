@@ -19,6 +19,7 @@ from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 
+from app.examples import EXAMPLES
 from trustgate import TrustGate, __version__
 from trustgate.config import Settings, get_settings
 from trustgate.schemas import RiskReport, VerificationRequest
@@ -103,6 +104,10 @@ def create_app(settings: Settings | None = None, gate_factory: Callable[[], Trus
     @app.get("/api/health")
     def health() -> dict:
         return {"status": "ok", "version": __version__, "layers": gate().status()}
+
+    @app.get("/api/examples")
+    def examples() -> list[dict]:
+        return EXAMPLES
 
     @app.post("/api/verify", response_model=RiskReport)
     def verify_endpoint(payload: VerificationRequest, request: Request) -> RiskReport:

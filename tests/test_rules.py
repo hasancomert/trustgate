@@ -58,15 +58,19 @@ def test_ceo_gift_card_fraud(engine):
 
 
 def test_invoice_redirect_with_payee_mismatch(engine):
-    msg = "Please note our bank details have changed. Pay the attached invoice to the new account below today. Do not use the old account."
-    result = run(
-        engine,
-        msg,
-        sender=SenderInfo(display_name="Brightline Supplies", address="accounts@brightline-supplies.co", claimed_organization="Brightline Supplies Ltd"),
-        payment=PaymentDetails(amount=18450, currency="eur", payee_name="Marcus Holt", payee_account="GB00TEST0000000000", method="bank_transfer", new_payee=True),
-    )
-    assert {"text.payment_change", "payment.payee_mismatch", "payment.new_payee", "combo.payment_redirect_pressure"} <= ids(result)
+    sender = SenderInfo(display_name="Brightline Supplies", address="accounts@brightline-supplies.co", claimed_organization="Brightline Supplies Ltd")
+    payment = PaymentDetails(amount=18450, currency="eur", payee_name="Marcus Holt", payee_account="GB00TEST0000000000", method="bank_transfer", new_payee=True)
+    calm = "Please note our bank details have changed. Pay the attached invoice to the new account below. Do not use the old account."
+    result = run(engine, calm, sender=sender, payment=payment)
+    assert {"text.payment_change", "payment.payee_mismatch", "payment.new_payee"} <= ids(result)
+    # A bank-detail change without pressure means "hold and verify", not an automatic block.
+    assert "combo.payment_redirect_pressure" not in ids(result) and result.floor == 35
+    assert 35 <= result.score < 80
     assert result.top_scam_type is ScamType.CEO_INVOICE_FRAUD
+
+    pressured = calm + " This is urgent and must be paid today, keep it confidential."
+    result = run(engine, pressured, sender=sender, payment=payment)
+    assert "combo.payment_redirect_pressure" in ids(result) and result.floor == 80
 
 
 def test_safe_account_bank_impersonation(engine):
@@ -158,6 +162,22 @@ def test_legitimate_messages_stay_low(engine, msg):
     result = run(engine, msg)
     assert result.score < 35, [(f.rule_id, f.evidence) for f in result.red_flags]
     assert result.floor is None
+    assert not any(f.severity.rank >= Severity.HIGH.rank for f in result.red_flags)
+
+
+def test_single_high_tactic_means_verify_first(engine):
+    result = run(engine, "Please use our updated bank details for this month's payment.")
+    assert result.floor == 35
+
+
+def test_prize_selection_needs_prize_context(engine):
+    assert "text.prize" not in ids(run(engine, "You have been selected as a reviewer for the mid-year feedback."))
+    assert "text.prize" in ids(run(engine, "You have been selected to receive a £500 voucher in our draw!"))
+
+
+def test_otp_read_out_to_agent(engine):
+    result = run(engine, "Read our agent the 6-digit code we send you to cancel the payment.")
+    assert any(f.rule_id == "text.credential_request" and f.severity is Severity.CRITICAL for f in result.red_flags)
 
 
 def test_score_saturates_and_is_bounded(engine):

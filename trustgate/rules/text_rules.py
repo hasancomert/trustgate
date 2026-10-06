@@ -201,7 +201,8 @@ TEXT_RULES: tuple[TextRule, ...] = (
         "text.irreversible_payment", "irreversible_payment", "Hard-to-reverse payment method",
         "Wire services and peer-to-peer apps offer little or no buyer protection once money is sent.",
         (
-            _p(r"\b(western union|moneygram|money order|paysafecard|prepaid (card|voucher))\b", H),
+            _p(r"\b(western union|moneygram|paysafecard)\b", H),
+            _p(r"\b(money order|prepaid (card|voucher))\b", M),
             _p(r"\b(wire transfer|wire the (money|funds|payment))\b", M),
             _p(r"\b(zelle|cash ?app|venmo)\b", M),
         ),
@@ -210,7 +211,7 @@ TEXT_RULES: tuple[TextRule, ...] = (
         "text.credential_request", "credential_request", "Asks for passwords or codes",
         "Banks and services never ask you to send passwords, PINs or one-time codes.",
         (
-            _p(r"\b(enter|provide|send|share|give|tell|read out|confirm|forward|reply with|text back)\b[^.!?\n]{0,25}\b(password|passcode|pin|otp|one[- ]time (code|password|passcode)|verification code|security code|auth(entication)? code|2fa code|cvv|cvc|card number|full card details|login details|credentials|sms code|(the |your )?(\d-digit |\w+-digit )?code (we|you|i|that) (just )?(sent|received|got))\b", C, unless_before=_NEGATED),
+            _p(r"\b(enter|provide|send|share|give|tell|read|read out|confirm|forward|reply with|text back)\b[^.!?\n]{0,25}\b(password|passcode|pin|otp|one[- ]time (code|password|passcode)|verification code|security code|auth(entication)? code|2fa code|cvv|cvc|card number|full card details|login details|credentials|sms code|(the |your )?(\d-digit |\w+-digit )?code (we|you|i|that) (just |will )?(sent|send|received|got|text)( you)?)\b", C, unless_before=_NEGATED),
             _p(r"\b(verify|confirm|update|validate|re-?activate|unlock|restore|secure)\s+(your\s+)?(account|identity|details|information|card|payment (details|information|method)|login|billing( information)?)\b", H, unless_before=_NEGATED),
             _p(r"\b(log[- ]?in|sign[- ]?in)\s+(here|now|below|via the link|at the link|to (verify|confirm|restore|unlock))\b", M),
         ),
@@ -246,7 +247,7 @@ TEXT_RULES: tuple[TextRule, ...] = (
         (
             _p(r"\bguaranteed\s+(returns?|profits?|income|payouts?)\b", H),
             _p(r"\b(double|triple|10x|multiply)\s+your\s+(money|investment|capital|savings|crypto)\b", H),
-            _p(r"\brisk[- ]free\b", H),
+            _p(r"\brisk[- ]free\b", M),
             _p(r"\b\d{1,3}(\.\d+)?\s?%\s+(daily|weekly|monthly|per (day|week|month)|a (day|week|month))\b", H),
             _p(r"\b(daily|weekly) (returns?|profits?|payouts?)\b", H),
             _p(r"\b(trading|investment) (platform|opportunity|group|mentor|signals?|bot)\b", M),
@@ -259,7 +260,8 @@ TEXT_RULES: tuple[TextRule, ...] = (
         "text.prize", "prize", "Unexpected prize or refund",
         "Surprise winnings or refunds you never asked for are bait to collect fees or details.",
         (
-            _p(r"\byou('ve| have)\s+(been\s+)?(won|selected|chosen)\b", H),
+            _p(r"\byou('ve| have)\s+(just\s+)?won\b", H),
+            _p(r"\byou('ve| have)\s+been\s+(selected|chosen)\b[^.!?\n]{0,40}\b(prize|reward|winner|draw|lottery|gift|cash|bonus|voucher|giveaway)\b", H),
             _p(r"\b(claim|collect|redeem)\s+(your\s+)?(prize|reward|winnings|refund|bonus|gift)\b", H),
             _p(r"\b(lottery|sweepstakes|jackpot|prize draw)\b", M),
             _p(r"\bunclaimed\s+(funds|refund|prize|parcel|package|inheritance)\b", H),

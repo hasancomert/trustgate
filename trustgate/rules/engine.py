@@ -64,7 +64,7 @@ COMBOS: tuple[Combo, ...] = (
           frozenset({"gift_card"}), frozenset({"urgency", "secrecy", "money_request", "authority", "channel_avoidance", "new_contact"})),
     Combo("combo.payment_redirect_pressure", "New bank details plus pressure",
           "Changed payment details combined with authority, urgency or secrecy is the signature of invoice / CEO fraud.",
-          frozenset({"payment_change", "payee_mismatch"}), frozenset({"authority", "urgency", "secrecy", "channel_avoidance", "new_payee"})),
+          frozenset({"payment_change", "payee_mismatch"}), frozenset({"authority", "urgency", "secrecy", "channel_avoidance"})),
     Combo("combo.new_number_money", "Unknown number asking for money",
           "Someone 'on a new number' asking for money is the 'Hi Mum' impersonation script.",
           frozenset({"new_contact"}), frozenset({"money_request", "fee_request", "gift_card", "crypto", "payment_change"})),
@@ -161,8 +161,9 @@ class RuleResult:
 
 
 class RuleEngine:
-    def __init__(self, severity_points: dict[str, float], floor_critical_flag: int, floor_critical_combo: int, max_urls: int = 20):
+    def __init__(self, severity_points: dict[str, float], floor_critical_flag: int, floor_critical_combo: int, max_urls: int = 20, floor_high_flag: int = 0):
         self.severity_points = severity_points
+        self.floor_high_flag = floor_high_flag
         self.floor_critical_flag = floor_critical_flag
         self.floor_critical_combo = floor_critical_combo
         self.max_urls = max_urls
@@ -198,6 +199,8 @@ class RuleEngine:
             floor = self.floor_critical_combo
         elif any(f.severity is Severity.CRITICAL for f in flags):
             floor = self.floor_critical_flag
+        elif self.floor_high_flag and any(f.severity is Severity.HIGH for f in flags):
+            floor = self.floor_high_flag
 
         return RuleResult(
             score=score,
@@ -429,6 +432,7 @@ def build_engine(settings: Settings) -> RuleEngine:
         floor_critical_flag=settings.rules.floors.critical_flag,
         floor_critical_combo=settings.rules.floors.critical_combo,
         max_urls=settings.limits.max_urls,
+        floor_high_flag=settings.rules.floors.high_flag,
     )
 
 

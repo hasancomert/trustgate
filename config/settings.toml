@@ -21,6 +21,7 @@ severity_points = { low = 8, medium = 18, high = 30, critical = 50 }
 # Minimum fused score when the rule engine sees a critical pattern. Floors stop
 # a single layer (e.g. an LLM fooled by prompt injection) from talking the score down.
 [rules.floors]
+high_flag = 35       # one strong tactic (e.g. changed bank details) => at least "verify first"
 critical_flag = 70
 critical_combo = 80
 

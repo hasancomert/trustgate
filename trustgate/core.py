@@ -56,8 +56,8 @@ class TrustGate:
         llm = self.analyst.analyze(request, rule_result, ml_prediction)
 
         score, signals = fuse(self.settings.scoring.weights, rule_result, ml_prediction.score if ml_prediction else None, llm)
-        if ml_prediction and ml_prediction.top_terms:
-            signals.ml.detail = "Top terms: " + ", ".join(ml_prediction.top_terms)
+        if ml_prediction and ml_prediction.top_terms and ml_prediction.probability >= 0.5:
+            signals.ml.detail = "Spam-like terms: " + ", ".join(ml_prediction.top_terms)
         verdict = verdict_for(score, self.settings.scoring.thresholds)
         scam_type = resolve_scam_type(verdict, rule_result, llm)
         flags = merge_flags(rule_result.red_flags, llm.grounded_flags)

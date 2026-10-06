@@ -44,6 +44,7 @@ class ScoringSettings(BaseModel):
 
 
 class RuleFloors(BaseModel):
+    high_flag: int = Field(default=0, ge=0, le=100)
     critical_flag: int = Field(ge=0, le=100)
     critical_combo: int = Field(ge=0, le=100)
 

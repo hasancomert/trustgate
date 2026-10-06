@@ -78,7 +78,7 @@ def test_live_mode_caches_identical_requests(settings, rules):
     analyst = LLMAnalyst(settings.llm, client=client)
     analyst.analyze(REQ, rules, None)
     second = analyst.analyze(REQ, rules, None)
-    assert len(client.calls) == 1 and second.detail == "cached"
+    assert len(client.calls) == 1 and second.cached
 
 
 @pytest.mark.parametrize("client", [FakeClient(error=LLMError("timeout")), FakeClient(reply={"risk_score": 5}), FakeClient(reply={"risk_score": "abc", "summary": "x"})])
