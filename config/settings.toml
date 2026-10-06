@@ -35,6 +35,9 @@ model = "Qwen/Qwen2.5-14B-Instruct"
 timeout_seconds = 25
 max_tokens = 700
 temperature = 0.1
+# Caps on live LLM calls across all clients (0 disables). Past them, checks continue with rules + classifier.
+max_calls_per_minute = 30
+max_calls_per_day = 3000
 
 [limits]
 max_message_chars = 6000

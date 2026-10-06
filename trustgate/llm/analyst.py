@@ -19,6 +19,7 @@ from typing import Any, Literal
 from pydantic import BaseModel, Field, field_validator
 
 from trustgate.config import LLMSettings
+from trustgate.llm.budget import CallBudget
 from trustgate.llm.client import ChatClient, LLMError, OpenAICompatibleClient
 from trustgate.llm.prompts import SYSTEM_PROMPT, build_user_prompt
 from trustgate.ml import MLPrediction
@@ -129,6 +130,7 @@ class LLMAnalyst:
         self._client = client
         self._cache: OrderedDict[str, tuple[LLMAnalysis, str]] = OrderedDict()
         self._lock = threading.Lock()
+        self.budget = CallBudget(settings.max_calls_per_minute, settings.max_calls_per_day)
 
     @property
     def mode(self) -> Literal["live", "mock"]:
@@ -153,6 +155,12 @@ class LLMAnalyst:
         if cached:
             analysis, model = cached
             return LLMOutcome(status="ok", model=model, analysis=analysis, grounded_flags=ground_flags(request.message, analysis.red_flags), cached=True)
+
+        limit = self.budget.try_acquire()
+        if limit:
+            logger.warning("LLM call budget reached (per %s); using the rule-based explanation.", limit)
+            period = "daily" if limit == "day" else "per-minute"
+            return LLMOutcome(status="fallback", detail=f"The AI analyst's {period} usage limit was reached; explanation generated from rule signals.")
 
         try:
             client = self._get_client()
