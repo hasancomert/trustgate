@@ -7,7 +7,7 @@
 from __future__ import annotations
 
 from enum import Enum
-from typing import Literal
+from typing import Annotated, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
@@ -130,7 +130,9 @@ class VerificationRequest(BaseModel):
     message: str = Field(min_length=1, max_length=20_000, description="SMS, WhatsApp or email text.")
     channel: Channel = Channel.OTHER
     sender: SenderInfo | None = None
-    urls: list[str] = Field(default_factory=list, max_length=50, description="Extra URLs; URLs inside the message are extracted automatically.")
+    urls: list[Annotated[str, Field(max_length=2048)]] = Field(
+        default_factory=list, max_length=50, description="Extra URLs; URLs inside the message are extracted automatically.",
+    )
     payment: PaymentDetails | None = None
     initiator: Initiator = Initiator.HUMAN
 

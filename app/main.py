@@ -10,12 +10,14 @@ from __future__ import annotations
 import logging
 import threading
 import time
+import traceback
 from collections import deque
 from collections.abc import Callable
 from contextlib import asynccontextmanager
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException, Request
+from fastapi.exceptions import RequestValidationError
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 
@@ -26,6 +28,7 @@ from trustgate.schemas import RiskReport, VerificationRequest
 
 logger = logging.getLogger("trustgate.api")
 STATIC_DIR = Path(__file__).resolve().parent / "static"
+MAX_BODY_BYTES = 128 * 1024
 
 SECURITY_HEADERS = {
     "X-Content-Type-Options": "nosniff",
@@ -96,6 +99,14 @@ def create_app(settings: Settings | None = None, gate_factory: Callable[[], Trus
         return state["gate"]
 
     @app.middleware("http")
+    async def body_size_limit(request: Request, call_next):
+        # Reject oversized bodies before they are read and parsed (a full request is well under 64 KB).
+        length = request.headers.get("content-length")
+        if length and length.isdigit() and int(length) > MAX_BODY_BYTES:
+            return JSONResponse(status_code=413, content={"detail": "Request body is too large."})
+        return await call_next(request)
+
+    @app.middleware("http")
     async def security_headers(request: Request, call_next):
         response = await call_next(request)
         if not request.url.path.startswith(("/docs", "/redoc", "/openapi.json")):
@@ -133,9 +144,16 @@ def create_app(settings: Settings | None = None, gate_factory: Callable[[], Trus
         )
         return report
 
+    @app.exception_handler(RequestValidationError)
+    async def invalid_request(_: Request, exc: RequestValidationError) -> JSONResponse:
+        # Say where and why, never echo the submitted text: it may be a private message (or not even encodable).
+        errors = [{"loc": list(e.get("loc", ())), "msg": e.get("msg", ""), "type": e.get("type", "")} for e in exc.errors()]
+        return JSONResponse(status_code=422, content={"detail": errors})
+
     @app.exception_handler(Exception)
     async def unhandled(_: Request, exc: Exception) -> JSONResponse:
-        logger.exception("Unhandled error: %s", type(exc).__name__)
+        # Frames only: an exception message can quote the request, and message contents are never logged.
+        logger.error("Unhandled error: %s\n%s", type(exc).__name__, "".join(traceback.format_tb(exc.__traceback__)))
         return JSONResponse(status_code=500, content={"detail": "Internal error while verifying. Please try again."})
 
     if STATIC_DIR.exists():

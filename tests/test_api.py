@@ -108,3 +108,18 @@ def test_quick_mode_skips_llm_and_has_its_own_rate_limit(settings):
         assert c.post("/api/verify?llm=false", json={"message": "hello"}).status_code == 429
         # Full checks are limited separately.
         assert [c.post("/api/verify", json={"message": "hello"}).status_code for _ in range(2)] == [200, 429]
+
+
+def test_invalid_requests_are_rejected_without_echoing_the_text(client):
+    secret = "my private message to mum"
+    r = client.post("/api/verify", json={"message": secret * 1000})  # over the schema's 20,000 characters
+    assert r.status_code == 422 and secret not in r.text
+    r = client.post("/api/verify", content='{"message": "pay now \\ud800 send the code"}', headers={"content-type": "application/json"})
+    assert r.status_code == 422 and r.json()["detail"][0]["loc"] == ["body", "message"]
+
+
+def test_oversized_bodies_and_urls_are_refused(client):
+    r = client.post("/api/verify", content="x" * (200 * 1024), headers={"content-type": "application/json"})
+    assert r.status_code == 413
+    r = client.post("/api/verify", json={"message": "check this", "urls": ["https://e.example/" + "a" * 3000]})
+    assert r.status_code == 422

@@ -18,7 +18,9 @@ _NEGATED = re.compile(r"\b(never|not|no one|nobody|don't|dont|do not|won't|will 
 # Protective advice about credentials, e.g. "do not tell anyone your PIN".
 _PROTECTIVE = re.compile(r"\b(pin|password|passcode|code|otp|security details|card details)\b", re.IGNORECASE)
 
-_MONEY = r"(?:[$€£₺]\s?\d[\d,.]*k?|\d[\d,.]*\s?(?:usd|eur|gbp|try|tl|dollars?|euros?|pounds?|lira|bucks|quid))"
+# Amounts are bounded (an amount is never 20+ characters) and never start inside a run of digits:
+# an unbounded "\d[\d,.]*" backtracks quadratically on a long digit string.
+_MONEY = r"(?:[$€£₺]\s?\d[\d,.]{0,20}k?|(?<![\d,.])\d[\d,.]{0,20}\s?(?:usd|eur|gbp|try|tl|dollars?|euros?|pounds?|lira|bucks|quid))"
 _CRYPTO = r"(?:bitcoin|btc|ethereum|eth|usdt|tether|crypto(?:currency|currencies)?|stablecoins?)"
 
 
@@ -307,7 +309,7 @@ TEXT_RULES: tuple[TextRule, ...] = (
             # Closing the checker's input block, or opening a fake instruction block.
             _p(r"<\s*/\s*(message|system|assistant|user|instructions?|prompt|context|input|email)\s*>", C),
             _p(r"<\s*(system|assistant|instructions?|prompt)\s*>", C),
-            _p(r"(={3,}|-{3,}|\*{3,}|#{3,}|\[)\s*end of (the )?(message|email|input|user input|document|transcript|conversation)\b", M),
+            _p(r"((?<![=*#-])(={3,}|-{3,}|\*{3,}|#{3,})|\[)\s*end of (the )?(message|email|input|user input|document|transcript|conversation)\b", M),
             _p(r"\bnew (system )?instructions?\s*:", M),
             # Fake system or developer notes.
             _p(r"\[\s*(system|developer|admin)\s+(override|instructions?|prompt)\s*\]|\b(system (override|instructions?|prompt)|developer (instructions?|override)|admin override)\s*:", C),

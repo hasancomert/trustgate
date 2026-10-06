@@ -439,8 +439,8 @@ def _field_injection_flags(request: VerificationRequest) -> list[RedFlag]:
     for source, label, value in fields:
         if not value:
             continue
-        text = _URL_SEPARATORS.sub(" ", unquote_plus(value)) if source == "links" else value
-        hit = next((p for p in patterns if p.regex.search(normalize(text).text)), None)
+        text = normalize(_URL_SEPARATORS.sub(" ", unquote_plus(value)) if source == "links" else value).text
+        hit = next((p for p in patterns if p.regex.search(text)), None)
         if hit:
             flags.append(RedFlag(
                 rule_id=_AGENT_RULE.rule_id, category=_AGENT_RULE.category, severity=hit.severity,
@@ -489,7 +489,8 @@ def _hidden_flags(hidden: list[HiddenText]) -> list[RedFlag]:
             rule_id=rule_id, category="obfuscation", severity=severity, title=title, explanation=explanation,
             evidence=piece.text[:160], start=start, end=end,
         ))
-        if piece.kind != "direction_controls" and any(p.regex.search(normalize(piece.text).text) for p in patterns):
+        revealed = normalize(piece.text).text
+        if piece.kind != "direction_controls" and any(p.regex.search(revealed) for p in patterns):
             flags.append(RedFlag(
                 rule_id=_AGENT_RULE.rule_id, category=_AGENT_RULE.category, severity=Severity.CRITICAL,
                 title="Hidden instructions aimed at an AI assistant",
