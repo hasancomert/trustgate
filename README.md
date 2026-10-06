@@ -120,7 +120,7 @@ python -m trustgate.ml.train        # ~1 min, writes models/tfidf_lr.joblib (add
 cp .env.example .env                # optional: set LLM_API_KEY for live AI analysis
 uvicorn app.main:app --reload       # open http://127.0.0.1:8000
 
-pytest                              # 196 tests, no network or datasets needed
+pytest                              # 197 tests, no network or datasets needed
 ```
 
 Without an API key everything still works: the LLM layer runs in mock mode and its weight is redistributed to the other layers.
