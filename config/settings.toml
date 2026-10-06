@@ -1,0 +1,43 @@
+# TrustGate configuration.
+# Environment variables (see .env.example) override the [llm] connection settings.
+
+[scoring]
+# Relative weight of each layer in the fused 0-100 risk score.
+# If a layer is unavailable (no trained model, LLM disabled) its weight is
+# redistributed proportionally across the remaining layers.
+weights = { rules = 0.45, ml = 0.20, llm = 0.35 }
+
+[scoring.thresholds]
+# risk_score >= suspicious  -> "suspicious"
+# risk_score >= dangerous   -> "dangerous"
+suspicious = 35
+dangerous = 70
+
+[rules]
+# Points contributed by a single red flag of each severity. Category scores are
+# combined with a noisy-OR so repeated weak signals saturate instead of summing.
+severity_points = { low = 8, medium = 18, high = 30, critical = 50 }
+
+# Minimum fused score when the rule engine sees a critical pattern. Floors stop
+# a single layer (e.g. an LLM fooled by prompt injection) from talking the score down.
+[rules.floors]
+high_flag = 35       # one strong tactic (e.g. changed bank details) => at least "verify first"
+critical_flag = 70
+critical_combo = 80
+
+[ml]
+model_path = "models/tfidf_lr.joblib"
+
+[llm]
+# Default provider: Featherless (OpenAI-compatible). Overridable via LLM_BASE_URL / LLM_MODEL.
+base_url = "https://api.featherless.ai/v1"
+model = "Qwen/Qwen2.5-14B-Instruct"
+timeout_seconds = 25
+max_tokens = 700
+temperature = 0.1
+
+[limits]
+max_message_chars = 6000
+max_urls = 20
+# Per-client requests per minute on POST /api/verify (protects the LLM budget).
+rate_limit_per_minute = 20

@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>TrustGate · Verify before money moves</title>
+  <meta name="description" content="TrustGate checks messages, payment requests and links for scam and impersonation risk before money moves.">
+  <link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/static/styles.css">
+  <script src="/static/app.js" defer></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <svg class="logo" viewBox="0 0 32 32" aria-hidden="true">
+        <path d="M16 2 4 7v8c0 7.4 5.1 13.4 12 15 6.9-1.6 12-7.6 12-15V7L16 2Z" class="logo-shield"/>
+        <path d="m10.5 16.2 3.8 3.8 7.4-8" class="logo-check"/>
+      </svg>
+      <div>
+        <h1>TrustGate</h1>
+        <p class="tagline">Verify before money moves.</p>
+      </div>
+    </div>
+    <ul class="layers" id="layers" aria-label="Analysis layers status"></ul>
+  </header>
+
+  <main class="layout">
+    <section class="card input-card" aria-labelledby="input-title">
+      <h2 id="input-title">Check a message before you pay</h2>
+      <p class="hint">Paste an SMS, WhatsApp or email. Add the sender, links or payment details if you have them.</p>
+
+      <div class="examples" role="group" aria-label="Demo examples">
+        <span class="examples-label">Try an example</span>
+        <button type="button" class="chip chip-dangerous" data-example="dangerous">Dangerous</button>
+        <button type="button" class="chip chip-suspicious" data-example="suspicious">Suspicious</button>
+        <button type="button" class="chip chip-safe" data-example="safe">Safe</button>
+      </div>
+
+      <form id="verify-form" novalidate>
+        <div class="row">
+          <label class="field">
+            <span>Channel</span>
+            <select name="channel" id="channel">
+              <option value="sms">SMS</option>
+              <option value="whatsapp">WhatsApp</option>
+              <option value="email">Email</option>
+              <option value="other">Other</option>
+            </select>
+          </label>
+          <label class="toggle">
+            <input type="checkbox" name="ai_agent" id="ai_agent">
+            <span>An AI agent is acting for me</span>
+          </label>
+        </div>
+
+        <label class="field" for="message">
+          <span>Message</span>
+        </label>
+        <textarea id="message" name="message" rows="8" maxlength="6000" required placeholder="Paste the message here…"></textarea>
+        <div class="counter"><span id="char-count">0</span> / 6000</div>
+
+        <details class="group">
+          <summary>Sender <span class="optional">optional</span></summary>
+          <div class="grid">
+            <label class="field"><span>Display name</span><input name="display_name" autocomplete="off" placeholder="e.g. Northwind Bank"></label>
+            <label class="field"><span>Email or phone</span><input name="address" autocomplete="off" placeholder="e.g. alerts@northwind.example"></label>
+            <label class="field wide"><span>Claims to be (organization)</span><input name="claimed_organization" autocomplete="off" placeholder="e.g. Northwind Bank"></label>
+          </div>
+        </details>
+
+        <details class="group">
+          <summary>Payment <span class="optional">optional</span></summary>
+          <div class="grid">
+            <label class="field"><span>Amount</span><input name="amount" type="number" min="0" step="0.01" inputmode="decimal"></label>
+            <label class="field"><span>Currency</span><input name="currency" maxlength="3" placeholder="EUR"></label>
+            <label class="field"><span>Payee name</span><input name="payee_name" autocomplete="off"></label>
+            <label class="field"><span>Payee account</span><input name="payee_account" autocomplete="off" placeholder="IBAN, wallet or email"></label>
+            <label class="field">
+              <span>Method</span>
+              <select name="method">
+                <option value="">Not specified</option>
+                <option value="bank_transfer">Bank transfer</option>
+                <option value="card">Card</option>
+                <option value="wallet">Wallet / payment app</option>
+                <option value="gift_card">Gift card</option>
+                <option value="crypto">Crypto</option>
+                <option value="cash">Cash</option>
+                <option value="other">Other</option>
+              </select>
+            </label>
+            <label class="toggle"><input type="checkbox" name="new_payee"><span>First payment to this payee</span></label>
+          </div>
+        </details>
+
+        <details class="group">
+          <summary>Links to check <span class="optional">optional</span></summary>
+          <label class="field"><span>One URL per line (links inside the message are found automatically)</span>
+            <textarea name="urls" rows="2" placeholder="https://…"></textarea>
+          </label>
+          <p class="note">Links are analysed from their text only. TrustGate never opens them.</p>
+        </details>
+
+        <div class="actions">
+          <button type="submit" class="primary" id="submit">Verify</button>
+          <button type="button" class="ghost" id="clear">Clear</button>
+        </div>
+      </form>
+    </section>
+
+    <section class="card result-card" aria-labelledby="result-title" aria-live="polite">
+      <h2 id="result-title" class="visually-hidden">Result</h2>
+
+      <div class="empty" id="empty">
+        <svg viewBox="0 0 64 64" aria-hidden="true" class="empty-icon"><path d="M32 4 8 14v16c0 14.8 10.2 26.8 24 30 13.8-3.2 24-15.2 24-30V14L32 4Z"/></svg>
+        <h3>Three independent checks</h3>
+        <ol class="how">
+          <li><strong>Rules</strong> spot manipulation tactics (pressure, secrecy, changed bank details) and look-alike links.</li>
+          <li><strong>A text classifier</strong> trained on open spam and phishing data adds a statistical signal.</li>
+          <li><strong>An AI analyst</strong> weighs everything and explains it in plain language.</li>
+        </ol>
+        <p class="muted">Pick an example or paste a message to start.</p>
+      </div>
+
+      <div class="loading" id="loading" hidden>
+        <div class="spinner" aria-hidden="true"></div>
+        <p id="loading-text">Checking manipulation tactics…</p>
+      </div>
+
+      <div class="error" id="error" role="alert" hidden></div>
+
+      <div id="report" hidden>
+        <div class="verdict-head">
+          <div class="gauge" id="gauge">
+            <svg viewBox="0 0 120 120" aria-hidden="true">
+              <circle class="gauge-track" cx="60" cy="60" r="52"/>
+              <circle class="gauge-value" id="gauge-value" cx="60" cy="60" r="52"/>
+            </svg>
+            <div class="gauge-label"><span id="score">0</span><small>/100 risk</small></div>
+          </div>
+          <div class="verdict-text">
+            <span class="pill" id="verdict"></span>
+            <h3 id="scam-type"></h3>
+            <p class="action" id="action"></p>
+          </div>
+        </div>
+
+        <p class="summary" id="summary"></p>
+
+        <h4>Message with red flags highlighted</h4>
+        <div class="highlighted" id="highlighted"></div>
+        <ul class="legend" aria-label="Severity legend">
+          <li><span class="swatch sev-critical"></span>Critical</li>
+          <li><span class="swatch sev-high"></span>High</li>
+          <li><span class="swatch sev-medium"></span>Medium</li>
+          <li><span class="swatch sev-low"></span>Low</li>
+        </ul>
+
+        <h4>Red flags <span class="count" id="flag-count"></span></h4>
+        <ul class="flags" id="flags"></ul>
+
+        <div id="links-section" hidden>
+          <h4>Links</h4>
+          <ul class="links" id="links"></ul>
+        </div>
+
+        <h4>What to do now</h4>
+        <ol class="steps" id="steps"></ol>
+
+        <details class="signals" open>
+          <summary>How this score was built</summary>
+          <div id="signals"></div>
+        </details>
+
+        <p class="disclaimer" id="disclaimer"></p>
+        <p class="meta" id="meta"></p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p>TrustGate · ForgeHacks Online 2026 · AI + Cybersecurity. Messages are not stored and links are never opened. <a href="/docs">API docs</a></p>
+  </footer>
+</body>
+</html>
