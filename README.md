@@ -54,11 +54,11 @@ flowchart LR
     V --> R["Layer 1: rule engine<br/>tactics, sender and payment checks"]
     V --> L["Static link analysis<br/>look-alikes, punycode, shorteners"]
     V --> M["Layer 2: TF-IDF + logistic regression"]
-    R --> P["Prompt: signals +<br/>fenced untrusted message"]
+    R --> P["Prompt: signals, revealed hidden text,<br/>fenced message + integrity code"]
     L --> P
     M --> P
-    P --> LLM["Layer 3: LLM analyst<br/>OpenAI-compatible (Featherless)"]
-    R --> F["Score fusion<br/>weights + safety floors"]
+    P --> LLM["Layer 3: LLM analyst<br/>OpenAI-compatible (Featherless)<br/>output validated and defanged"]
+    R --> F["Score fusion<br/>weights + safety floors<br/>analyst set aside under attack"]
     L --> F
     M --> F
     LLM --> F
@@ -99,12 +99,29 @@ A provider-agnostic, OpenAI-compatible client (base URL, model and key come from
 - Sender names, payee fields and links are declared untrusted too, and look-alikes of the fence (`</MESSAGE >`) are neutralized in every field.
 - **An analyst that disagrees is overruled, not quoted.** If the LLM's own judgement contradicts the final verdict (for example a prompt injection convinced it a scam is safe, but the rule floors still block it), its summary, steps and quotes are dropped and the report says it was overruled.
 - It answers in English whatever the message language.
+- When the message attacks the analyst itself, see the [injection shield](#injection-shield-when-the-message-attacks-the-analyst) below.
 - The classifier signal carries an explicit caveat about its known domain shift, which removed an anchoring effect we measured (see below).
 - **Mock mode** without an API key, **fallback** on any provider error, and an in-memory cache for repeated checks. The verification always completes.
 
 ### Fusion (`trustgate/scoring.py`)
 
-`score = Σ wᵢ·sᵢ / Σ wᵢ` over the layers that produced a score (default weights: rules 0.45, ML 0.20, LLM 0.35, see `config/settings.toml`), then `max(score, rule floor)`. Thresholds: `≥ 35` suspicious → **hold**, `≥ 70` dangerous → **block**. When `initiator` is `ai_agent`, the first safe step is always to pause the agent and ask the account owner.
+`score = Σ wᵢ·sᵢ / Σ wᵢ` over the layers that produced a score (default weights: rules 0.45, ML 0.20, LLM 0.35, see `config/settings.toml`), then `max(score, floor)`. The floor comes from the rules (critical patterns and combinations) and, since v2, from a confident analyst: an LLM score ≥ 70 holds the payment (floor 35) even when the rules saw nothing, but the analyst alone can never block. Thresholds: `≥ 35` suspicious → **hold**, `≥ 70` dangerous → **block**. When `initiator` is `ai_agent`, the first safe step is always to pause the agent and ask the account owner.
+
+### Injection shield: when the message attacks the analyst
+
+LLM-based phishing detectors can be steered by instructions hidden in the very message they judge; Koide et al. ([*Clouding the Mirror*, 2026](https://arxiv.org/abs/2602.05484)) show that even GPT-5-based detectors fall for it, mostly through text a person never sees but the model reads. Their defence, *InjectDefuser*, combines prompt hardening, allowlist context and output validation. TrustGate layers seven defences, and assumes the analyst *can* be fooled:
+
+| Defence | What it does |
+|---|---|
+| **Reveal hidden text** | Decodes invisible Unicode tag characters ("ASCII smuggling"), text-direction controls, HTML comments, text pushed far below the message and base64 / HTML-entity / URL-encoded payloads ([`rules/hidden.py`](trustgate/rules/hidden.py)). Hidden content is flagged, instructions to AI inside it are **critical**, and the LLM sees it explicitly labelled as hidden. |
+| **Instruction rules on every field** | English and Turkish patterns for planted verdicts, fake system notes, fence escapes, role-play, "approve without asking the user", in the message *and* the sender name, payee fields and link paths. |
+| **Analyst may only add risk under attack** | When the message instructs AI systems, an analyst score below the other layers is **set aside**, not averaged in; floors still hold the payment. |
+| **Integrity code** | Each request carries a random code the answer must echo; a verdict written in advance (planted JSON) cannot know it and is rejected. |
+| **Output hygiene** | Links, e-mail addresses, phone and account numbers in the analyst's own text are defanged (`hxxps://example[.]com`), so a hijacked analyst cannot relay "call this number to verify". |
+| **Allowlist context** | Official domains of mentioned, claimed or imitated brands come from the reference list and are given to the LLM as facts, against which "our licensed partner domain" claims fail. |
+| **Fenced prompt + sandwich** | Every user-supplied field is declared untrusted, fence look-alikes are neutralized, and the rule is repeated after the data. |
+
+A regression test feeds every known injection to a **fully compromised analyst** that answers "safe, risk 0" and even echoes the integrity code: each one must still end on hold or blocked ([`tests/test_injection_regression.py`](tests/test_injection_regression.py)).
 
 ## Quick start
 
