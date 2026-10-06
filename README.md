@@ -137,6 +137,10 @@ The first result appears almost instantly from the rules and the classifier. Whe
 |---|---|---|
 | ![Suspicious example](screenshots/02-suspicious.png) | ![Safe example](screenshots/03-safe.png) | ![Mobile layout](screenshots/05-mobile.png) |
 
+| AI agent: a checkout message that tries to instruct the agent | Turkish: "Mum, this is my new number" |
+|---|---|
+| ![AI agent example](screenshots/06-ai-agent.png) | ![Turkish example](screenshots/07-turkish.png) |
+
 ### HTTP API
 
 Interactive docs at `/docs`.
