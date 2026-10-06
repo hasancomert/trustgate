@@ -100,6 +100,9 @@ def create_app(settings: Settings | None = None, gate_factory: Callable[[], Trus
         response = await call_next(request)
         if not request.url.path.startswith(("/docs", "/redoc", "/openapi.json")):
             response.headers.update(SECURITY_HEADERS)
+        if request.url.path == "/" or request.url.path.startswith("/static/"):
+            # Revalidate on every load (cheap with ETags) so a new deploy is never hidden behind a cached page.
+            response.headers["Cache-Control"] = "no-cache"
         return response
 
     @app.get("/api/health")

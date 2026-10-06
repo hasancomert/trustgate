@@ -93,6 +93,12 @@ def test_index_and_static_assets(client):
         assert client.get(asset).status_code == 200
 
 
+def test_page_and_assets_are_revalidated_after_a_deploy(client):
+    for path in ("/", "/static/app.js", "/static/styles.css"):
+        assert client.get(path).headers["Cache-Control"] == "no-cache"
+    assert "Cache-Control" not in client.get("/api/health").headers
+
+
 def test_quick_mode_skips_llm_and_has_its_own_rate_limit(settings):
     with make_client(settings, rate_limit_per_minute=1, quick_rate_limit_per_minute=2) as c:
         body = c.post("/api/verify?llm=false", json={"message": "Buy gift cards now and send me the codes."}).json()
