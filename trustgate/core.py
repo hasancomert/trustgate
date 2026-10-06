@@ -13,7 +13,7 @@ import uuid
 
 from trustgate import __version__
 from trustgate.config import Settings, get_settings
-from trustgate.llm import LLMAnalyst
+from trustgate.llm import LLMAnalyst, LLMOutcome
 from trustgate.ml import MLClassifier
 from trustgate.rules import build_engine
 from trustgate.schemas import RiskReport, VerificationRequest
@@ -45,7 +45,8 @@ class TrustGate:
             "llm_model": self.settings.llm.model if self.analyst.mode == "live" else None,
         }
 
-    def verify(self, request: VerificationRequest) -> RiskReport:
+    def verify(self, request: VerificationRequest, use_llm: bool = True) -> RiskReport:
+        """Run all layers. With `use_llm=False` the LLM is skipped for an instant rules + ML check."""
         started = time.perf_counter()
         limit = self.settings.limits.max_message_chars
         if len(request.message) > limit:
@@ -53,7 +54,10 @@ class TrustGate:
 
         rule_result = self.engine.analyze(request)
         ml_prediction = self.ml.predict(request.message) if self.ml else None
-        llm = self.analyst.analyze(request, rule_result, ml_prediction)
+        if use_llm:
+            llm = self.analyst.analyze(request, rule_result, ml_prediction)
+        else:
+            llm = LLMOutcome(status="skipped", detail="Quick check: the AI analyst runs as a separate step.")
 
         score, signals = fuse(self.settings.scoring.weights, rule_result, ml_prediction.score if ml_prediction else None, llm)
         if ml_prediction and ml_prediction.top_terms and ml_prediction.probability >= 0.5:
@@ -96,6 +100,6 @@ def get_gate() -> TrustGate:
     return _default_gate
 
 
-def verify(request: VerificationRequest) -> RiskReport:
+def verify(request: VerificationRequest, use_llm: bool = True) -> RiskReport:
     """Analyze a message / payment request / link and return a risk report."""
-    return get_gate().verify(request)
+    return get_gate().verify(request, use_llm=use_llm)

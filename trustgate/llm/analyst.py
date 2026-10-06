@@ -83,7 +83,7 @@ class LLMAnalysis(BaseModel):
         return [str(s).strip()[:240] for s in (v or []) if str(s).strip()][:5]
 
 
-LLMStatus = Literal["ok", "mock", "fallback"]
+LLMStatus = Literal["ok", "mock", "fallback", "skipped"]
 
 
 @dataclass

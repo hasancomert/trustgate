@@ -93,3 +93,9 @@ def test_template_summary_mentions_reasons():
     text = template_summary(Verdict.DANGEROUS, ScamType.FAMILY_IMPERSONATION, flags)
     assert "family impersonation" in text.lower() and "asks for secrecy" in text
     assert template_summary(Verdict.SAFE, ScamType.NONE, []).startswith("No strong")
+
+
+def test_skipped_llm_is_excluded_from_fusion():
+    score, sig = fuse(W, rule_result(40), 60.0, LLMOutcome(status="skipped", detail="quick"))
+    assert sig.llm.status == "skipped" and sig.llm.effective_weight == 0
+    assert score == round((0.45 * 40 + 0.20 * 60) / 0.65)

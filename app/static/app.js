@@ -27,7 +27,8 @@ const LOADING_STEPS = [
 const FLAGS_VISIBLE = 6;
 const GAUGE_CIRCUMFERENCE = 2 * Math.PI * 52;
 
-const state = { examples: {}, loadingTimer: null };
+// `run` numbers each submission so a slow response can never overwrite a newer one.
+const state = { examples: {}, loadingTimer: null, llmLive: false, run: 0 };
 
 // ------------------------------------------------------------------ setup
 
@@ -54,6 +55,7 @@ async function loadHealth() {
     const body = await res.json();
     const layers = body.layers || {};
     const model = layers.llm_model ? layers.llm_model.split("/").pop() : null;
+    state.llmLive = layers.llm === "live";
     const items = [
       ["Rules", layers.rules === "ok" ? "on" : "off", "on"],
       ["Text classifier", layers.ml === "ok" ? "on" : "off", layers.ml === "ok" ? "on" : "unavailable"],
@@ -148,6 +150,19 @@ function buildPayload(form) {
 
 // ------------------------------------------------------------------ request
 
+async function postVerify(payload, quick) {
+  const res = await fetch(quick ? "/api/verify?llm=false" : "/api/verify", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  const body = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(errorText(res.status, body));
+  return body;
+}
+
+// With a live LLM, two requests run in parallel: an instant rules + classifier check that is
+// shown right away, and the full check whose report replaces it when the AI analyst is done.
 async function onSubmit(event) {
   event.preventDefault();
   const form = event.currentTarget;
@@ -156,20 +171,35 @@ async function onSubmit(event) {
     showError("Please paste a message to check.");
     return;
   }
+  const run = ++state.run;
+  let finalShown = false;
+  let preliminaryShown = false;
   startLoading();
+  const full = postVerify(payload, false);
+  if (state.llmLive) {
+    postVerify(payload, true)
+      .then((quick) => {
+        if (run !== state.run || finalShown) return;
+        preliminaryShown = true;
+        renderReport(quick, payload.message, true);
+      })
+      .catch(() => { /* the full request reports any error */ });
+  }
   try {
-    const res = await fetch("/api/verify", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
-    const body = await res.json().catch(() => ({}));
-    if (!res.ok) throw new Error(errorText(res.status, body));
-    renderReport(body, payload.message);
+    const report = await full;
+    if (run !== state.run) return;
+    finalShown = true;
+    renderReport(report, payload.message, false);
   } catch (err) {
-    showError(err.message || "Something went wrong. Please try again.");
+    if (run !== state.run) return;
+    finalShown = true;
+    if (preliminaryShown) {
+      showPendingNote(`AI analysis unavailable: ${err.message} Showing the rules and classifier result.`);
+    } else {
+      showError(err.message || "Something went wrong. Please try again.");
+    }
   } finally {
-    stopLoading();
+    if (run === state.run) stopLoading();
   }
 }
 
@@ -204,10 +234,18 @@ function showError(message) {
   showOnly("error");
 }
 
+function showPendingNote(text) {
+  const pending = $("#pending");
+  pending.textContent = text;
+  pending.classList.add("note");
+  pending.hidden = false;
+}
+
 // ------------------------------------------------------------------ rendering
 
-function renderReport(report, message) {
+function renderReport(report, message, preliminary = false) {
   const card = $(".result-card");
+  const firstRender = $("#report").hidden;
   card.classList.remove("v-safe", "v-suspicious", "v-dangerous");
   card.classList.add(`v-${report.verdict}`);
 
@@ -224,13 +262,19 @@ function renderReport(report, message) {
   renderFlags(report.red_flags);
   renderLinks(report.link_findings);
   $("#steps").replaceChildren(...report.safe_steps.map((step) => el("li", null, step)));
-  renderSignals(report.signals);
+  renderSignals(report.signals, preliminary);
   $("#disclaimer").textContent = report.disclaimer;
   const llm = report.signals.llm;
-  $("#meta").textContent = `Checked in ${report.latency_ms} ms · engine v${report.engine_version} · AI analyst: ${llm.status}`;
+  $("#meta").textContent = preliminary
+    ? `Preliminary result from rules + text classifier in ${report.latency_ms} ms · engine v${report.engine_version}`
+    : `Checked in ${report.latency_ms} ms · engine v${report.engine_version} · AI analyst: ${llm.status}`;
+  const pending = $("#pending");
+  pending.textContent = "AI analyst is reviewing…";
+  pending.classList.remove("note");
+  pending.hidden = !preliminary;
 
   showOnly("report");
-  if (window.matchMedia("(max-width: 960px)").matches) card.scrollIntoView({ behavior: "smooth", block: "start" });
+  if (firstRender && window.matchMedia("(max-width: 960px)").matches) card.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
 function renderHighlighted(container, text, flags) {
@@ -323,7 +367,7 @@ function renderLinks(findings) {
   }));
 }
 
-function renderSignals(signals) {
+function renderSignals(signals, preliminary = false) {
   const rows = [
     ["Rules", "Tactics & links", signals.rules],
     ["Text classifier", "TF-IDF + LR", signals.ml],
@@ -333,7 +377,8 @@ function renderSignals(signals) {
   const nodes = rows.map(([name, sub, layer]) => {
     const row = el("div", "signal-row");
     const label = el("div", "signal-name", name);
-    label.append(el("small", null, layer.score === null ? layer.status : `${sub} · weight ${Math.round(layer.effective_weight * 100)}%`));
+    const status = preliminary && layer.status === "skipped" ? "reviewing…" : layer.status;
+    label.append(el("small", null, layer.score === null ? status : `${sub} · weight ${Math.round(layer.effective_weight * 100)}%`));
     const bar = el("div", "bar");
     const fill = el("span");
     fill.style.width = `${layer.score === null ? 0 : layer.score}%`;

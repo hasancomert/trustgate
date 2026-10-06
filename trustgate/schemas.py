@@ -156,7 +156,8 @@ class LinkFinding(BaseModel):
     impersonated_brand: str | None = None
 
 
-LayerStatus = Literal["ok", "mock", "fallback", "unavailable", "disabled"]
+# "skipped": the caller asked for a quick check without the LLM layer.
+LayerStatus = Literal["ok", "mock", "fallback", "unavailable", "disabled", "skipped"]
 
 
 class LayerSignal(BaseModel):

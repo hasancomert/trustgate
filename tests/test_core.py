@@ -80,3 +80,12 @@ def test_llm_flags_hidden_when_llm_judges_message_safe(settings):
     report = gate.verify(VerificationRequest(message="Your share of dinner is £20, pay me back whenever."))
     assert report.verdict is Verdict.SAFE
     assert not any(f.source == "llm" for f in report.red_flags)
+
+
+def test_quick_check_skips_the_llm(settings):
+    client = FakeClient(reply={"risk_score": 99, "summary": "should not be used"})
+    gate = TrustGate(settings=settings, ml=None, analyst=LLMAnalyst(settings.llm, client=client))
+    report = gate.verify(VerificationRequest(message="Buy gift cards urgently and send me the codes."), use_llm=False)
+    assert client.calls == []
+    assert report.signals.llm.status == "skipped" and report.signals.llm.effective_weight == 0
+    assert report.verdict is Verdict.DANGEROUS
