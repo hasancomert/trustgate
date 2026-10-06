@@ -60,4 +60,18 @@ EXAMPLES: list[dict] = [
             "payment": {"amount": 649, "currency": "USD", "payee_name": "LG Payments Ltd", "method": "bank_transfer", "new_payee": True},
         },
     },
+    {
+        "id": "turkish",
+        "label": "Turkish 'Mum, this is my new number' scam",
+        "expected": "dangerous",
+        "request": {
+            "channel": "whatsapp",
+            "message": (
+                "Annecim selam, telefonum bozuldu, bu yeni numaram. Şu an konuşamıyorum, buradan yazışalım. "
+                "Acil bir ödeme yapmam lazım, 3.750 TL'yi şu IBAN'a hemen gönderebilir misin? "
+                "Yarın sabah geri veririm. Kimseye söyleme, sonra anlatırım."
+            ),
+            "payment": {"amount": 3750, "currency": "TRY", "payee_name": "Deniz Arslan", "method": "bank_transfer", "new_payee": True},
+        },
+    },
 ]

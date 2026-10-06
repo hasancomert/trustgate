@@ -73,7 +73,7 @@ def test_docs_are_served(client):
 def test_examples_are_valid_requests(client):
     from trustgate.schemas import VerificationRequest
     items = client.get("/api/examples").json()
-    assert [i["id"] for i in items] == ["dangerous", "suspicious", "safe", "agent"]
+    assert [i["id"] for i in items] == ["dangerous", "suspicious", "safe", "agent", "turkish"]
     assert next(i for i in items if i["id"] == "agent")["request"]["initiator"] == "ai_agent"
     for item in items:
         VerificationRequest.model_validate(item["request"])

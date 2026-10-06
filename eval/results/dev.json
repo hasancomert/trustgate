@@ -1,5 +1,8 @@
 {
-  "generated_at": "2026-10-06T13:57:51+00:00",
+  "set": "dev",
+  "title": "Development scenarios (English)",
+  "note": "Hand-written while the rules were developed, so these numbers are optimistic.",
+  "generated_at": "2026-10-06T18:19:31+00:00",
   "threshold": 35,
   "modes": {
     "rules": {
@@ -19,251 +22,344 @@
       "per_scenario": [
         {
           "id": "S01",
+          "lang": "en",
           "label": "scam",
           "expected_type": "family_impersonation",
           "score": 84.8,
           "flagged": true,
-          "predicted_type": "family_impersonation"
+          "predicted_type": "family_impersonation",
+          "llm_score": null,
+          "llm_status": null
         },
         {
           "id": "S02",
+          "lang": "en",
           "label": "scam",
           "expected_type": "family_impersonation",
           "score": 80.0,
           "flagged": true,
-          "predicted_type": "family_impersonation"
+          "predicted_type": "family_impersonation",
+          "llm_score": null,
+          "llm_status": null
         },
         {
           "id": "S03",
+          "lang": "en",
           "label": "scam",
           "expected_type": "ceo_invoice_fraud",
           "score": 89.8,
           "flagged": true,
-          "predicted_type": "ceo_invoice_fraud"
+          "predicted_type": "ceo_invoice_fraud",
+          "llm_score": null,
+          "llm_status": null
         },
         {
           "id": "S04",
+          "lang": "en",
           "label": "scam",
           "expected_type": "ceo_invoice_fraud",
           "score": 71.9,
           "flagged": true,
-          "predicted_type": "ceo_invoice_fraud"
+          "predicted_type": "ceo_invoice_fraud",
+          "llm_score": null,
+          "llm_status": null
         },
         {
           "id": "S05",
+          "lang": "en",
           "label": "scam",
           "expected_type": "ceo_invoice_fraud",
           "score": 80.0,
           "flagged": true,
-          "predicted_type": "ceo_invoice_fraud"
+          "predicted_type": "ceo_invoice_fraud",
+          "llm_score": null,
+          "llm_status": null
         },
         {
           "id": "S06",
+          "lang": "en",
           "label": "scam",
           "expected_type": "fake_delivery",
           "score": 80.0,
           "flagged": true,
-          "predicted_type": "fake_delivery"
+          "predicted_type": "fake_delivery",
+          "llm_score": null,
+          "llm_status": null
         },
         {
           "id": "S07",
+          "lang": "en",
           "label": "scam",
           "expected_type": "fake_delivery",
           "score": 80.0,
           "flagged": true,
-          "predicted_type": "fake_delivery"
+          "predicted_type": "fake_delivery",
+          "llm_score": null,
+          "llm_status": null
         },
         {
           "id": "S08",
+          "lang": "en",
           "label": "scam",
           "expected_type": "bank_impersonation",
           "score": 52.9,
           "flagged": true,
-          "predicted_type": null
+          "predicted_type": null,
+          "llm_score": null,
+          "llm_status": null
         },
         {
           "id": "S09",
+          "lang": "en",
           "label": "scam",
           "expected_type": "bank_impersonation",
           "score": 71.3,
           "flagged": true,
-          "predicted_type": "bank_impersonation"
+          "predicted_type": "bank_impersonation",
+          "llm_score": null,
+          "llm_status": null
         },
         {
           "id": "S10",
+          "lang": "en",
           "label": "scam",
           "expected_type": "account_phishing",
           "score": 59.8,
           "flagged": true,
-          "predicted_type": "account_phishing"
+          "predicted_type": "account_phishing",
+          "llm_score": null,
+          "llm_status": null
         },
         {
           "id": "S11",
+          "lang": "en",
           "label": "scam",
           "expected_type": "account_phishing",
           "score": 70.0,
           "flagged": true,
-          "predicted_type": "account_phishing"
+          "predicted_type": "account_phishing",
+          "llm_score": null,
+          "llm_status": null
         },
         {
           "id": "S12",
+          "lang": "en",
           "label": "scam",
           "expected_type": "tech_support",
           "score": 51.0,
           "flagged": true,
-          "predicted_type": "tech_support"
+          "predicted_type": "tech_support",
+          "llm_score": null,
+          "llm_status": null
         },
         {
           "id": "S13",
+          "lang": "en",
           "label": "scam",
           "expected_type": "government_impersonation",
           "score": 35.6,
           "flagged": true,
-          "predicted_type": null
+          "predicted_type": null,
+          "llm_score": null,
+          "llm_status": null
         },
         {
           "id": "S14",
+          "lang": "en",
           "label": "scam",
           "expected_type": "government_impersonation",
           "score": 80.0,
           "flagged": true,
-          "predicted_type": null
+          "predicted_type": null,
+          "llm_score": null,
+          "llm_status": null
         },
         {
           "id": "S15",
+          "lang": "en",
           "label": "scam",
           "expected_type": "investment_scam",
           "score": 80.0,
           "flagged": true,
-          "predicted_type": "investment_scam"
+          "predicted_type": "investment_scam",
+          "llm_score": null,
+          "llm_status": null
         },
         {
           "id": "S16",
+          "lang": "en",
           "label": "scam",
           "expected_type": "romance_scam",
           "score": 80.0,
           "flagged": true,
-          "predicted_type": "investment_scam"
+          "predicted_type": "investment_scam",
+          "llm_score": null,
+          "llm_status": null
         },
         {
           "id": "S17",
+          "lang": "en",
           "label": "scam",
           "expected_type": "job_scam",
           "score": 80.0,
           "flagged": true,
-          "predicted_type": "job_scam"
+          "predicted_type": "job_scam",
+          "llm_score": null,
+          "llm_status": null
         },
         {
           "id": "S18",
+          "lang": "en",
           "label": "scam",
           "expected_type": "marketplace_scam",
           "score": 80.0,
           "flagged": true,
-          "predicted_type": "marketplace_scam"
+          "predicted_type": "marketplace_scam",
+          "llm_score": null,
+          "llm_status": null
         },
         {
           "id": "S19",
+          "lang": "en",
           "label": "scam",
           "expected_type": "prize_lottery",
           "score": 80.7,
           "flagged": true,
-          "predicted_type": "prize_lottery"
+          "predicted_type": "prize_lottery",
+          "llm_score": null,
+          "llm_status": null
         },
         {
           "id": "S20",
+          "lang": "en",
           "label": "scam",
           "expected_type": "other",
           "score": 88.2,
           "flagged": true,
-          "predicted_type": null
+          "predicted_type": null,
+          "llm_score": null,
+          "llm_status": null
         },
         {
           "id": "L01",
+          "lang": "en",
           "label": "legit",
           "expected_type": "none",
           "score": 0.0,
           "flagged": false,
-          "predicted_type": null
+          "predicted_type": null,
+          "llm_score": null,
+          "llm_status": null
         },
         {
           "id": "L02",
+          "lang": "en",
           "label": "legit",
           "expected_type": "none",
           "score": 0.0,
           "flagged": false,
-          "predicted_type": null
+          "predicted_type": null,
+          "llm_score": null,
+          "llm_status": null
         },
         {
           "id": "L03",
+          "lang": "en",
           "label": "legit",
           "expected_type": "none",
           "score": 0.0,
           "flagged": false,
-          "predicted_type": null
+          "predicted_type": null,
+          "llm_score": null,
+          "llm_status": null
         },
         {
           "id": "L04",
+          "lang": "en",
           "label": "legit",
           "expected_type": "none",
           "score": 0.0,
           "flagged": false,
-          "predicted_type": null
+          "predicted_type": null,
+          "llm_score": null,
+          "llm_status": null
         },
         {
           "id": "L05",
+          "lang": "en",
           "label": "legit",
           "expected_type": "none",
           "score": 0.0,
           "flagged": false,
-          "predicted_type": null
+          "predicted_type": null,
+          "llm_score": null,
+          "llm_status": null
         },
         {
           "id": "L06",
+          "lang": "en",
           "label": "legit",
           "expected_type": "none",
           "score": 0.0,
           "flagged": false,
-          "predicted_type": null
+          "predicted_type": null,
+          "llm_score": null,
+          "llm_status": null
         },
         {
           "id": "L07",
+          "lang": "en",
           "label": "legit",
           "expected_type": "none",
           "score": 0.0,
           "flagged": false,
-          "predicted_type": null
+          "predicted_type": null,
+          "llm_score": null,
+          "llm_status": null
         },
         {
           "id": "L08",
+          "lang": "en",
           "label": "legit",
           "expected_type": "none",
           "score": 18.0,
           "flagged": false,
-          "predicted_type": null
+          "predicted_type": null,
+          "llm_score": null,
+          "llm_status": null
         },
         {
           "id": "L09",
+          "lang": "en",
           "label": "legit",
           "expected_type": "none",
           "score": 24.6,
           "flagged": false,
-          "predicted_type": null
+          "predicted_type": null,
+          "llm_score": null,
+          "llm_status": null
         },
         {
           "id": "L10",
+          "lang": "en",
           "label": "legit",
           "expected_type": "none",
           "score": 0.0,
           "flagged": false,
-          "predicted_type": null
+          "predicted_type": null,
+          "llm_score": null,
+          "llm_status": null
         },
         {
           "id": "L11",
+          "lang": "en",
           "label": "legit",
           "expected_type": "none",
           "score": 18.0,
           "flagged": false,
-          "predicted_type": null
+          "predicted_type": null,
+          "llm_score": null,
+          "llm_status": null
         }
       ]
     },
@@ -283,251 +379,344 @@
       "per_scenario": [
         {
           "id": "S01",
+          "lang": "en",
           "label": "scam",
           "expected_type": "family_impersonation",
           "score": 2.3,
           "flagged": false,
-          "predicted_type": null
+          "predicted_type": null,
+          "llm_score": null,
+          "llm_status": null
         },
         {
           "id": "S02",
+          "lang": "en",
           "label": "scam",
           "expected_type": "family_impersonation",
           "score": 2.2,
           "flagged": false,
-          "predicted_type": null
+          "predicted_type": null,
+          "llm_score": null,
+          "llm_status": null
         },
         {
           "id": "S03",
+          "lang": "en",
           "label": "scam",
           "expected_type": "ceo_invoice_fraud",
           "score": 1.2,
           "flagged": false,
-          "predicted_type": null
+          "predicted_type": null,
+          "llm_score": null,
+          "llm_status": null
         },
         {
           "id": "S04",
+          "lang": "en",
           "label": "scam",
           "expected_type": "ceo_invoice_fraud",
           "score": 45.0,
           "flagged": false,
-          "predicted_type": null
+          "predicted_type": null,
+          "llm_score": null,
+          "llm_status": null
         },
         {
           "id": "S05",
+          "lang": "en",
           "label": "scam",
           "expected_type": "ceo_invoice_fraud",
           "score": 1.0,
           "flagged": false,
-          "predicted_type": null
+          "predicted_type": null,
+          "llm_score": null,
+          "llm_status": null
         },
         {
           "id": "S06",
+          "lang": "en",
           "label": "scam",
           "expected_type": "fake_delivery",
           "score": 34.2,
           "flagged": false,
-          "predicted_type": null
+          "predicted_type": null,
+          "llm_score": null,
+          "llm_status": null
         },
         {
           "id": "S07",
+          "lang": "en",
           "label": "scam",
           "expected_type": "fake_delivery",
           "score": 82.1,
           "flagged": true,
-          "predicted_type": null
+          "predicted_type": null,
+          "llm_score": null,
+          "llm_status": null
         },
         {
           "id": "S08",
+          "lang": "en",
           "label": "scam",
           "expected_type": "bank_impersonation",
           "score": 96.9,
           "flagged": true,
-          "predicted_type": null
+          "predicted_type": null,
+          "llm_score": null,
+          "llm_status": null
         },
         {
           "id": "S09",
+          "lang": "en",
           "label": "scam",
           "expected_type": "bank_impersonation",
           "score": 74.3,
           "flagged": true,
-          "predicted_type": null
+          "predicted_type": null,
+          "llm_score": null,
+          "llm_status": null
         },
         {
           "id": "S10",
+          "lang": "en",
           "label": "scam",
           "expected_type": "account_phishing",
           "score": 84.7,
           "flagged": true,
-          "predicted_type": null
+          "predicted_type": null,
+          "llm_score": null,
+          "llm_status": null
         },
         {
           "id": "S11",
+          "lang": "en",
           "label": "scam",
           "expected_type": "account_phishing",
           "score": 83.5,
           "flagged": true,
-          "predicted_type": null
+          "predicted_type": null,
+          "llm_score": null,
+          "llm_status": null
         },
         {
           "id": "S12",
+          "lang": "en",
           "label": "scam",
           "expected_type": "tech_support",
           "score": 33.7,
           "flagged": false,
-          "predicted_type": null
+          "predicted_type": null,
+          "llm_score": null,
+          "llm_status": null
         },
         {
           "id": "S13",
+          "lang": "en",
           "label": "scam",
           "expected_type": "government_impersonation",
           "score": 75.1,
           "flagged": true,
-          "predicted_type": null
+          "predicted_type": null,
+          "llm_score": null,
+          "llm_status": null
         },
         {
           "id": "S14",
+          "lang": "en",
           "label": "scam",
           "expected_type": "government_impersonation",
           "score": 67.6,
           "flagged": true,
-          "predicted_type": null
+          "predicted_type": null,
+          "llm_score": null,
+          "llm_status": null
         },
         {
           "id": "S15",
+          "lang": "en",
           "label": "scam",
           "expected_type": "investment_scam",
           "score": 88.1,
           "flagged": true,
-          "predicted_type": null
+          "predicted_type": null,
+          "llm_score": null,
+          "llm_status": null
         },
         {
           "id": "S16",
+          "lang": "en",
           "label": "scam",
           "expected_type": "romance_scam",
           "score": 8.0,
           "flagged": false,
-          "predicted_type": null
+          "predicted_type": null,
+          "llm_score": null,
+          "llm_status": null
         },
         {
           "id": "S17",
+          "lang": "en",
           "label": "scam",
           "expected_type": "job_scam",
           "score": 99.5,
           "flagged": true,
-          "predicted_type": null
+          "predicted_type": null,
+          "llm_score": null,
+          "llm_status": null
         },
         {
           "id": "S18",
+          "lang": "en",
           "label": "scam",
           "expected_type": "marketplace_scam",
           "score": 17.0,
           "flagged": false,
-          "predicted_type": null
+          "predicted_type": null,
+          "llm_score": null,
+          "llm_status": null
         },
         {
           "id": "S19",
+          "lang": "en",
           "label": "scam",
           "expected_type": "prize_lottery",
           "score": 99.1,
           "flagged": true,
-          "predicted_type": null
+          "predicted_type": null,
+          "llm_score": null,
+          "llm_status": null
         },
         {
           "id": "S20",
+          "lang": "en",
           "label": "scam",
           "expected_type": "other",
           "score": 75.0,
           "flagged": true,
-          "predicted_type": null
+          "predicted_type": null,
+          "llm_score": null,
+          "llm_status": null
         },
         {
           "id": "L01",
+          "lang": "en",
           "label": "legit",
           "expected_type": "none",
           "score": 87.4,
           "flagged": true,
-          "predicted_type": null
+          "predicted_type": null,
+          "llm_score": null,
+          "llm_status": null
         },
         {
           "id": "L02",
+          "lang": "en",
           "label": "legit",
           "expected_type": "none",
           "score": 80.2,
           "flagged": true,
-          "predicted_type": null
+          "predicted_type": null,
+          "llm_score": null,
+          "llm_status": null
         },
         {
           "id": "L03",
+          "lang": "en",
           "label": "legit",
           "expected_type": "none",
           "score": 7.2,
           "flagged": false,
-          "predicted_type": null
+          "predicted_type": null,
+          "llm_score": null,
+          "llm_status": null
         },
         {
           "id": "L04",
+          "lang": "en",
           "label": "legit",
           "expected_type": "none",
           "score": 0.1,
           "flagged": false,
-          "predicted_type": null
+          "predicted_type": null,
+          "llm_score": null,
+          "llm_status": null
         },
         {
           "id": "L05",
+          "lang": "en",
           "label": "legit",
           "expected_type": "none",
           "score": 5.5,
           "flagged": false,
-          "predicted_type": null
+          "predicted_type": null,
+          "llm_score": null,
+          "llm_status": null
         },
         {
           "id": "L06",
+          "lang": "en",
           "label": "legit",
           "expected_type": "none",
           "score": 2.5,
           "flagged": false,
-          "predicted_type": null
+          "predicted_type": null,
+          "llm_score": null,
+          "llm_status": null
         },
         {
           "id": "L07",
+          "lang": "en",
           "label": "legit",
           "expected_type": "none",
           "score": 51.1,
           "flagged": true,
-          "predicted_type": null
+          "predicted_type": null,
+          "llm_score": null,
+          "llm_status": null
         },
         {
           "id": "L08",
+          "lang": "en",
           "label": "legit",
           "expected_type": "none",
           "score": 99.3,
           "flagged": true,
-          "predicted_type": null
+          "predicted_type": null,
+          "llm_score": null,
+          "llm_status": null
         },
         {
           "id": "L09",
+          "lang": "en",
           "label": "legit",
           "expected_type": "none",
           "score": 49.5,
           "flagged": false,
-          "predicted_type": null
+          "predicted_type": null,
+          "llm_score": null,
+          "llm_status": null
         },
         {
           "id": "L10",
+          "lang": "en",
           "label": "legit",
           "expected_type": "none",
           "score": 84.4,
           "flagged": true,
-          "predicted_type": null
+          "predicted_type": null,
+          "llm_score": null,
+          "llm_status": null
         },
         {
           "id": "L11",
+          "lang": "en",
           "label": "legit",
           "expected_type": "none",
           "score": 15.0,
           "flagged": false,
-          "predicted_type": null
+          "predicted_type": null,
+          "llm_score": null,
+          "llm_status": null
         }
       ]
     },
@@ -544,256 +733,349 @@
           "tp": 20
         },
         "scam_type_accuracy": 0.85,
-        "median_latency_ms": 42
+        "median_latency_ms": 40
       },
       "per_scenario": [
         {
           "id": "S01",
+          "lang": "en",
           "label": "scam",
           "expected_type": "family_impersonation",
           "score": 80.0,
           "flagged": true,
-          "predicted_type": "family_impersonation"
+          "predicted_type": "family_impersonation",
+          "llm_score": null,
+          "llm_status": "mock"
         },
         {
           "id": "S02",
+          "lang": "en",
           "label": "scam",
           "expected_type": "family_impersonation",
           "score": 80.0,
           "flagged": true,
-          "predicted_type": "family_impersonation"
+          "predicted_type": "family_impersonation",
+          "llm_score": null,
+          "llm_status": "mock"
         },
         {
           "id": "S03",
+          "lang": "en",
           "label": "scam",
           "expected_type": "ceo_invoice_fraud",
           "score": 80.0,
           "flagged": true,
-          "predicted_type": "ceo_invoice_fraud"
+          "predicted_type": "ceo_invoice_fraud",
+          "llm_score": null,
+          "llm_status": "mock"
         },
         {
           "id": "S04",
+          "lang": "en",
           "label": "scam",
           "expected_type": "ceo_invoice_fraud",
           "score": 64.0,
           "flagged": true,
-          "predicted_type": "ceo_invoice_fraud"
+          "predicted_type": "ceo_invoice_fraud",
+          "llm_score": null,
+          "llm_status": "mock"
         },
         {
           "id": "S05",
+          "lang": "en",
           "label": "scam",
           "expected_type": "ceo_invoice_fraud",
           "score": 80.0,
           "flagged": true,
-          "predicted_type": "ceo_invoice_fraud"
+          "predicted_type": "ceo_invoice_fraud",
+          "llm_score": null,
+          "llm_status": "mock"
         },
         {
           "id": "S06",
+          "lang": "en",
           "label": "scam",
           "expected_type": "fake_delivery",
           "score": 80.0,
           "flagged": true,
-          "predicted_type": "fake_delivery"
+          "predicted_type": "fake_delivery",
+          "llm_score": null,
+          "llm_status": "mock"
         },
         {
           "id": "S07",
+          "lang": "en",
           "label": "scam",
           "expected_type": "fake_delivery",
           "score": 80.0,
           "flagged": true,
-          "predicted_type": "fake_delivery"
+          "predicted_type": "fake_delivery",
+          "llm_score": null,
+          "llm_status": "mock"
         },
         {
           "id": "S08",
+          "lang": "en",
           "label": "scam",
           "expected_type": "bank_impersonation",
           "score": 66.0,
           "flagged": true,
-          "predicted_type": "other"
+          "predicted_type": "other",
+          "llm_score": null,
+          "llm_status": "mock"
         },
         {
           "id": "S09",
+          "lang": "en",
           "label": "scam",
           "expected_type": "bank_impersonation",
           "score": 72.0,
           "flagged": true,
-          "predicted_type": "bank_impersonation"
+          "predicted_type": "bank_impersonation",
+          "llm_score": null,
+          "llm_status": "mock"
         },
         {
           "id": "S10",
+          "lang": "en",
           "label": "scam",
           "expected_type": "account_phishing",
           "score": 67.0,
           "flagged": true,
-          "predicted_type": "account_phishing"
+          "predicted_type": "account_phishing",
+          "llm_score": null,
+          "llm_status": "mock"
         },
         {
           "id": "S11",
+          "lang": "en",
           "label": "scam",
           "expected_type": "account_phishing",
           "score": 70.0,
           "flagged": true,
-          "predicted_type": "account_phishing"
+          "predicted_type": "account_phishing",
+          "llm_score": null,
+          "llm_status": "mock"
         },
         {
           "id": "S12",
+          "lang": "en",
           "label": "scam",
           "expected_type": "tech_support",
           "score": 46.0,
           "flagged": true,
-          "predicted_type": "tech_support"
+          "predicted_type": "tech_support",
+          "llm_score": null,
+          "llm_status": "mock"
         },
         {
           "id": "S13",
+          "lang": "en",
           "label": "scam",
           "expected_type": "government_impersonation",
           "score": 48.0,
           "flagged": true,
-          "predicted_type": "other"
+          "predicted_type": "other",
+          "llm_score": null,
+          "llm_status": "mock"
         },
         {
           "id": "S14",
+          "lang": "en",
           "label": "scam",
           "expected_type": "government_impersonation",
           "score": 80.0,
           "flagged": true,
-          "predicted_type": "other"
+          "predicted_type": "other",
+          "llm_score": null,
+          "llm_status": "mock"
         },
         {
           "id": "S15",
+          "lang": "en",
           "label": "scam",
           "expected_type": "investment_scam",
           "score": 80.0,
           "flagged": true,
-          "predicted_type": "investment_scam"
+          "predicted_type": "investment_scam",
+          "llm_score": null,
+          "llm_status": "mock"
         },
         {
           "id": "S16",
+          "lang": "en",
           "label": "scam",
           "expected_type": "romance_scam",
           "score": 80.0,
           "flagged": true,
-          "predicted_type": "investment_scam"
+          "predicted_type": "investment_scam",
+          "llm_score": null,
+          "llm_status": "mock"
         },
         {
           "id": "S17",
+          "lang": "en",
           "label": "scam",
           "expected_type": "job_scam",
           "score": 80.0,
           "flagged": true,
-          "predicted_type": "job_scam"
+          "predicted_type": "job_scam",
+          "llm_score": null,
+          "llm_status": "mock"
         },
         {
           "id": "S18",
+          "lang": "en",
           "label": "scam",
           "expected_type": "marketplace_scam",
           "score": 80.0,
           "flagged": true,
-          "predicted_type": "marketplace_scam"
+          "predicted_type": "marketplace_scam",
+          "llm_score": null,
+          "llm_status": "mock"
         },
         {
           "id": "S19",
+          "lang": "en",
           "label": "scam",
           "expected_type": "prize_lottery",
           "score": 86.0,
           "flagged": true,
-          "predicted_type": "prize_lottery"
+          "predicted_type": "prize_lottery",
+          "llm_score": null,
+          "llm_status": "mock"
         },
         {
           "id": "S20",
+          "lang": "en",
           "label": "scam",
           "expected_type": "other",
           "score": 84.0,
           "flagged": true,
-          "predicted_type": "other"
+          "predicted_type": "other",
+          "llm_score": null,
+          "llm_status": "mock"
         },
         {
           "id": "L01",
+          "lang": "en",
           "label": "legit",
           "expected_type": "none",
           "score": 27.0,
           "flagged": false,
-          "predicted_type": null
+          "predicted_type": null,
+          "llm_score": null,
+          "llm_status": "mock"
         },
         {
           "id": "L02",
+          "lang": "en",
           "label": "legit",
           "expected_type": "none",
           "score": 25.0,
           "flagged": false,
-          "predicted_type": null
+          "predicted_type": null,
+          "llm_score": null,
+          "llm_status": "mock"
         },
         {
           "id": "L03",
+          "lang": "en",
           "label": "legit",
           "expected_type": "none",
           "score": 2.0,
           "flagged": false,
-          "predicted_type": null
+          "predicted_type": null,
+          "llm_score": null,
+          "llm_status": "mock"
         },
         {
           "id": "L04",
+          "lang": "en",
           "label": "legit",
           "expected_type": "none",
           "score": 0.0,
           "flagged": false,
-          "predicted_type": null
+          "predicted_type": null,
+          "llm_score": null,
+          "llm_status": "mock"
         },
         {
           "id": "L05",
+          "lang": "en",
           "label": "legit",
           "expected_type": "none",
           "score": 2.0,
           "flagged": false,
-          "predicted_type": null
+          "predicted_type": null,
+          "llm_score": null,
+          "llm_status": "mock"
         },
         {
           "id": "L06",
+          "lang": "en",
           "label": "legit",
           "expected_type": "none",
           "score": 1.0,
           "flagged": false,
-          "predicted_type": null
+          "predicted_type": null,
+          "llm_score": null,
+          "llm_status": "mock"
         },
         {
           "id": "L07",
+          "lang": "en",
           "label": "legit",
           "expected_type": "none",
           "score": 16.0,
           "flagged": false,
-          "predicted_type": null
+          "predicted_type": null,
+          "llm_score": null,
+          "llm_status": "mock"
         },
         {
           "id": "L08",
+          "lang": "en",
           "label": "legit",
           "expected_type": "none",
           "score": 43.0,
           "flagged": true,
-          "predicted_type": "other"
+          "predicted_type": "other",
+          "llm_score": null,
+          "llm_status": "mock"
         },
         {
           "id": "L09",
+          "lang": "en",
           "label": "legit",
           "expected_type": "none",
           "score": 32.0,
           "flagged": false,
-          "predicted_type": null
+          "predicted_type": null,
+          "llm_score": null,
+          "llm_status": "mock"
         },
         {
           "id": "L10",
+          "lang": "en",
           "label": "legit",
           "expected_type": "none",
           "score": 26.0,
           "flagged": false,
-          "predicted_type": null
+          "predicted_type": null,
+          "llm_score": null,
+          "llm_status": "mock"
         },
         {
           "id": "L11",
+          "lang": "en",
           "label": "legit",
           "expected_type": "none",
           "score": 17.0,
           "flagged": false,
-          "predicted_type": null
+          "predicted_type": null,
+          "llm_score": null,
+          "llm_status": "mock"
         }
       ]
     },
@@ -810,328 +1092,351 @@
           "tp": 20
         },
         "scam_type_accuracy": 0.95,
-        "median_latency_ms": 5830
+        "median_latency_ms": 8129
       },
       "per_scenario": [
         {
           "id": "S01",
+          "lang": "en",
           "label": "scam",
           "expected_type": "family_impersonation",
           "score": 80.0,
           "flagged": true,
-          "predicted_type": "family_impersonation"
+          "predicted_type": "family_impersonation",
+          "llm_score": 85.0,
+          "llm_status": "ok"
         },
         {
           "id": "S02",
+          "lang": "en",
           "label": "scam",
           "expected_type": "family_impersonation",
           "score": 80.0,
           "flagged": true,
-          "predicted_type": "family_impersonation"
+          "predicted_type": "family_impersonation",
+          "llm_score": 90.0,
+          "llm_status": "ok"
         },
         {
           "id": "S03",
+          "lang": "en",
           "label": "scam",
           "expected_type": "ceo_invoice_fraud",
           "score": 80.0,
           "flagged": true,
-          "predicted_type": "ceo_invoice_fraud"
+          "predicted_type": "ceo_invoice_fraud",
+          "llm_score": 85.0,
+          "llm_status": "ok"
         },
         {
           "id": "S04",
+          "lang": "en",
           "label": "scam",
           "expected_type": "ceo_invoice_fraud",
-          "score": 71.0,
+          "score": 64.0,
           "flagged": true,
-          "predicted_type": "ceo_invoice_fraud"
+          "predicted_type": "ceo_invoice_fraud",
+          "llm_score": 65.0,
+          "llm_status": "ok"
         },
         {
           "id": "S05",
+          "lang": "en",
           "label": "scam",
           "expected_type": "ceo_invoice_fraud",
           "score": 80.0,
           "flagged": true,
-          "predicted_type": "ceo_invoice_fraud"
+          "predicted_type": "ceo_invoice_fraud",
+          "llm_score": 85.0,
+          "llm_status": "ok"
         },
         {
           "id": "S06",
+          "lang": "en",
           "label": "scam",
           "expected_type": "fake_delivery",
           "score": 80.0,
           "flagged": true,
-          "predicted_type": "fake_delivery"
+          "predicted_type": "fake_delivery",
+          "llm_score": 65.0,
+          "llm_status": "ok"
         },
         {
           "id": "S07",
+          "lang": "en",
           "label": "scam",
           "expected_type": "fake_delivery",
           "score": 81.0,
           "flagged": true,
-          "predicted_type": "fake_delivery"
+          "predicted_type": "fake_delivery",
+          "llm_score": 85.0,
+          "llm_status": "ok"
         },
         {
           "id": "S08",
+          "lang": "en",
           "label": "scam",
           "expected_type": "bank_impersonation",
           "score": 69.0,
           "flagged": true,
-          "predicted_type": "bank_impersonation"
+          "predicted_type": "bank_impersonation",
+          "llm_score": 75.0,
+          "llm_status": "ok"
         },
         {
           "id": "S09",
+          "lang": "en",
           "label": "scam",
           "expected_type": "bank_impersonation",
           "score": 77.0,
           "flagged": true,
-          "predicted_type": "bank_impersonation"
+          "predicted_type": "bank_impersonation",
+          "llm_score": 85.0,
+          "llm_status": "ok"
         },
         {
           "id": "S10",
+          "lang": "en",
           "label": "scam",
           "expected_type": "account_phishing",
           "score": 70.0,
           "flagged": true,
-          "predicted_type": "account_phishing"
+          "predicted_type": "account_phishing",
+          "llm_score": 75.0,
+          "llm_status": "ok"
         },
         {
           "id": "S11",
+          "lang": "en",
           "label": "scam",
           "expected_type": "account_phishing",
           "score": 70.0,
           "flagged": true,
-          "predicted_type": "account_phishing"
+          "predicted_type": "account_phishing",
+          "llm_score": 85.0,
+          "llm_status": "ok"
         },
         {
           "id": "S12",
+          "lang": "en",
           "label": "scam",
           "expected_type": "tech_support",
-          "score": 56.0,
+          "score": 51.0,
           "flagged": true,
-          "predicted_type": "tech_support"
+          "predicted_type": "tech_support",
+          "llm_score": 60.0,
+          "llm_status": "ok"
         },
         {
           "id": "S13",
+          "lang": "en",
           "label": "scam",
           "expected_type": "government_impersonation",
           "score": 61.0,
           "flagged": true,
-          "predicted_type": "government_impersonation"
+          "predicted_type": "government_impersonation",
+          "llm_score": 85.0,
+          "llm_status": "ok"
         },
         {
           "id": "S14",
+          "lang": "en",
           "label": "scam",
           "expected_type": "government_impersonation",
           "score": 80.0,
           "flagged": true,
-          "predicted_type": "fake_delivery"
+          "predicted_type": "other",
+          "llm_score": 75.0,
+          "llm_status": "ok"
         },
         {
           "id": "S15",
+          "lang": "en",
           "label": "scam",
           "expected_type": "investment_scam",
           "score": 80.0,
           "flagged": true,
-          "predicted_type": "investment_scam"
+          "predicted_type": "investment_scam",
+          "llm_score": 85.0,
+          "llm_status": "ok"
         },
         {
           "id": "S16",
+          "lang": "en",
           "label": "scam",
           "expected_type": "romance_scam",
           "score": 80.0,
           "flagged": true,
-          "predicted_type": "investment_scam"
+          "predicted_type": "investment_scam",
+          "llm_score": 90.0,
+          "llm_status": "ok"
         },
         {
           "id": "S17",
+          "lang": "en",
           "label": "scam",
           "expected_type": "job_scam",
           "score": 82.0,
           "flagged": true,
-          "predicted_type": "job_scam"
+          "predicted_type": "job_scam",
+          "llm_score": 85.0,
+          "llm_status": "ok"
         },
         {
           "id": "S18",
+          "lang": "en",
           "label": "scam",
           "expected_type": "marketplace_scam",
           "score": 80.0,
           "flagged": true,
-          "predicted_type": "marketplace_scam"
+          "predicted_type": "marketplace_scam",
+          "llm_score": 75.0,
+          "llm_status": "ok"
         },
         {
           "id": "S19",
+          "lang": "en",
           "label": "scam",
           "expected_type": "prize_lottery",
-          "score": 82.0,
+          "score": 86.0,
           "flagged": true,
-          "predicted_type": "prize_lottery"
+          "predicted_type": "prize_lottery",
+          "llm_score": 85.0,
+          "llm_status": "ok"
         },
         {
           "id": "S20",
+          "lang": "en",
           "label": "scam",
           "expected_type": "other",
           "score": 88.0,
           "flagged": true,
-          "predicted_type": "marketplace_scam"
+          "predicted_type": "marketplace_scam",
+          "llm_score": 95.0,
+          "llm_status": "ok"
         },
         {
           "id": "L01",
+          "lang": "en",
           "label": "legit",
           "expected_type": "none",
-          "score": 21.0,
+          "score": 17.0,
           "flagged": false,
-          "predicted_type": null
+          "predicted_type": null,
+          "llm_score": 0.0,
+          "llm_status": "ok"
         },
         {
           "id": "L02",
+          "lang": "en",
           "label": "legit",
           "expected_type": "none",
-          "score": 20.0,
+          "score": 23.0,
           "flagged": false,
-          "predicted_type": null
+          "predicted_type": null,
+          "llm_score": 20.0,
+          "llm_status": "ok"
         },
         {
           "id": "L03",
+          "lang": "en",
           "label": "legit",
           "expected_type": "none",
-          "score": 3.0,
+          "score": 5.0,
           "flagged": false,
-          "predicted_type": null
+          "predicted_type": null,
+          "llm_score": 10.0,
+          "llm_status": "ok"
         },
         {
           "id": "L04",
+          "lang": "en",
           "label": "legit",
           "expected_type": "none",
           "score": 0.0,
           "flagged": false,
-          "predicted_type": null
+          "predicted_type": null,
+          "llm_score": 0.0,
+          "llm_status": "ok"
         },
         {
           "id": "L05",
+          "lang": "en",
           "label": "legit",
           "expected_type": "none",
-          "score": 3.0,
+          "score": 5.0,
           "flagged": false,
-          "predicted_type": null
+          "predicted_type": null,
+          "llm_score": 10.0,
+          "llm_status": "ok"
         },
         {
           "id": "L06",
+          "lang": "en",
           "label": "legit",
           "expected_type": "none",
           "score": 0.0,
           "flagged": false,
-          "predicted_type": null
+          "predicted_type": null,
+          "llm_score": 0.0,
+          "llm_status": "ok"
         },
         {
           "id": "L07",
+          "lang": "en",
           "label": "legit",
           "expected_type": "none",
           "score": 14.0,
           "flagged": false,
-          "predicted_type": null
+          "predicted_type": null,
+          "llm_score": 10.0,
+          "llm_status": "ok"
         },
         {
           "id": "L08",
+          "lang": "en",
           "label": "legit",
           "expected_type": "none",
           "score": 35.0,
           "flagged": true,
-          "predicted_type": "other"
+          "predicted_type": "other",
+          "llm_score": 20.0,
+          "llm_status": "ok"
         },
         {
           "id": "L09",
+          "lang": "en",
           "label": "legit",
           "expected_type": "none",
-          "score": 30.0,
+          "score": 28.0,
           "flagged": false,
-          "predicted_type": null
+          "predicted_type": null,
+          "llm_score": 20.0,
+          "llm_status": "ok"
         },
         {
           "id": "L10",
+          "lang": "en",
           "label": "legit",
           "expected_type": "none",
           "score": 24.0,
           "flagged": false,
-          "predicted_type": null
+          "predicted_type": null,
+          "llm_score": 20.0,
+          "llm_status": "ok"
         },
         {
           "id": "L11",
+          "lang": "en",
           "label": "legit",
           "expected_type": "none",
           "score": 18.0,
           "flagged": false,
-          "predicted_type": null
+          "predicted_type": null,
+          "llm_score": 20.0,
+          "llm_status": "ok"
         }
       ]
-    }
-  },
-  "ml_holdout": {
-    "model": "tfidf(word 1-2 + char_wb 3-5) + logistic_regression",
-    "C": 16.0,
-    "trained_at": "2026-10-06T13:26:30+00:00",
-    "sklearn": "1.9.1",
-    "python": "3.11.17",
-    "seed": 42,
-    "test_size": 0.2,
-    "data": {
-      "raw_examples": 23672,
-      "after_dedup": 22257,
-      "dropped_duplicates_or_conflicts": 1415,
-      "by_source_label": {
-        "email:0": 10678,
-        "email:1": 6444,
-        "sms:0": 4516,
-        "sms:1": 619
-      }
-    },
-    "tuning": {
-      "1.0": 0.9655,
-      "4.0": 0.9703,
-      "8.0": 0.9714,
-      "16.0": 0.9732
-    },
-    "holdout": {
-      "overall": {
-        "n": 4452,
-        "precision": 0.9778,
-        "recall": 0.9682,
-        "f1": 0.973,
-        "accuracy": 0.9829,
-        "confusion_matrix": {
-          "tn": 3008,
-          "fp": 31,
-          "fn": 45,
-          "tp": 1368
-        },
-        "roc_auc": 0.9974
-      },
-      "email": {
-        "n": 3425,
-        "precision": 0.9819,
-        "recall": 0.9697,
-        "f1": 0.9758,
-        "accuracy": 0.9819,
-        "confusion_matrix": {
-          "tn": 2113,
-          "fp": 23,
-          "fn": 39,
-          "tp": 1250
-        },
-        "roc_auc": 0.998
-      },
-      "sms": {
-        "n": 1027,
-        "precision": 0.9365,
-        "recall": 0.9516,
-        "f1": 0.944,
-        "accuracy": 0.9864,
-        "confusion_matrix": {
-          "tn": 895,
-          "fp": 8,
-          "fn": 6,
-          "tp": 118
-        },
-        "roc_auc": 0.9925
-      }
     }
   }
 }

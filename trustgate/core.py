@@ -13,6 +13,7 @@ import uuid
 
 from trustgate import __version__
 from trustgate.config import Settings, get_settings
+from trustgate.lang import is_turkish
 from trustgate.llm import LLMAnalyst, LLMOutcome
 from trustgate.ml import MLClassifier
 from trustgate.rules import build_engine
@@ -53,7 +54,9 @@ class TrustGate:
             request = request.model_copy(update={"message": request.message[:limit]})
 
         rule_result = self.engine.analyze(request)
-        ml_prediction = self.ml.predict(request.message) if self.ml else None
+        # The classifier was trained on English corpora only; its score on Turkish text means nothing.
+        turkish = is_turkish(request.message)
+        ml_prediction = self.ml.predict(request.message) if self.ml and not turkish else None
         if use_llm:
             llm = self.analyst.analyze(request, rule_result, ml_prediction)
         else:
@@ -62,6 +65,9 @@ class TrustGate:
         score, signals = fuse(self.settings.scoring.weights, rule_result, ml_prediction.score if ml_prediction else None, llm)
         if ml_prediction and ml_prediction.top_terms and ml_prediction.probability >= 0.5:
             signals.ml.detail = "Spam-like terms: " + ", ".join(ml_prediction.top_terms)
+        if self.ml and turkish:
+            signals.ml.status = "skipped"
+            signals.ml.detail = "The text classifier is English-only, so it was skipped for this Turkish message."
         verdict = verdict_for(score, self.settings.scoring.thresholds)
         scam_type = resolve_scam_type(verdict, rule_result, llm)
         # LLM phrases are only shown when the analyst itself judges the message risky.

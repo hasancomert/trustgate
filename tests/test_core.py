@@ -2,6 +2,7 @@ import pytest
 
 from trustgate import TrustGate, VerificationRequest, verify
 from trustgate.llm import LLMAnalyst
+from trustgate.ml import MLPrediction
 from trustgate.schemas import Initiator, PaymentDetails, RecommendedAction, RiskReport, ScamType, Verdict
 
 from tests.test_llm import FakeClient
@@ -89,3 +90,25 @@ def test_quick_check_skips_the_llm(settings):
     assert client.calls == []
     assert report.signals.llm.status == "skipped" and report.signals.llm.effective_weight == 0
     assert report.verdict is Verdict.DANGEROUS
+
+
+class StubML:
+    def __init__(self, probability: float):
+        self.probability = probability
+        self.calls: list[str] = []
+
+    def predict(self, text: str) -> MLPrediction:
+        self.calls.append(text)
+        return MLPrediction(probability=self.probability, top_terms=["free"])
+
+
+def test_turkish_messages_skip_the_english_classifier(settings):
+    ml = StubML(0.99)
+    gate = TrustGate(settings=settings, ml=ml, analyst=LLMAnalyst(settings.llm))
+    report = gate.verify(VerificationRequest(message="Anneciğim akşam yemeğe geliyorum, ekmek almama gerek var mı?"))
+    assert ml.calls == []
+    assert report.signals.ml.status == "skipped" and report.signals.ml.effective_weight == 0
+    assert report.verdict is Verdict.SAFE
+
+    report = gate.verify(VerificationRequest(message="See you at the station tomorrow"))
+    assert len(ml.calls) == 1 and report.signals.ml.status == "ok"

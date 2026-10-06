@@ -109,6 +109,7 @@ h1, h2, h3, h4 { line-height: 1.25; margin: 0; }
 .chip-suspicious { background: var(--suspicious-bg); color: var(--suspicious); }
 .chip-safe { background: var(--safe-bg); color: var(--safe); }
 .chip-agent { background: var(--agent-bg); color: var(--agent); }
+.chip-lang { background: var(--surface-2); color: var(--text); border-color: var(--border); }
 
 form { display: flex; flex-direction: column; gap: 10px; }
 .row { display: flex; gap: 14px; align-items: end; flex-wrap: wrap; }

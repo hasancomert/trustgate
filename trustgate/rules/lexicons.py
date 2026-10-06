@@ -17,11 +17,13 @@ class Brand:
     mentions: tuple[str, ...]
     # Extra registered domains the brand legitimately uses (CDNs, mail, regional).
     related_domains: tuple[str, ...] = field(default_factory=tuple)
+    # Names scammers put in domains that differ from the official label (turkiye.gov.tr -> "edevlet").
+    extra_labels: tuple[str, ...] = field(default_factory=tuple)
 
     @property
     def labels(self) -> tuple[str, ...]:
         """Second-level labels used for lookalike comparison, e.g. 'paypal'."""
-        return tuple(sorted({d.split(".")[0] for d in self.domains}))
+        return tuple(sorted({d.split(".")[0] for d in self.domains} | set(self.extra_labels)))
 
     def owns(self, registered_domain: str) -> bool:
         return registered_domain in self.domains or registered_domain in self.related_domains
@@ -58,11 +60,25 @@ BRANDS: tuple[Brand, ...] = (
     Brand("DocuSign", ("docusign.com", "docusign.net"), ("docusign",)),
     Brand("Adobe", ("adobe.com",), ("adobe",)),
     Brand("Steam", ("steampowered.com", "steamcommunity.com"), ("steam account", "steam wallet", "steam gift")),
+    # Turkey: public services, couriers, banks and marketplaces that smishing campaigns imitate.
+    Brand("e-Devlet", ("turkiye.gov.tr",), ("e-devlet", "edevlet"), extra_labels=("edevlet",)),
+    Brand("PTT", ("ptt.gov.tr",), ("ptt",)),
+    Brand("Yurtiçi Kargo", ("yurticikargo.com",), ("yurtici kargo",)),
+    Brand("Aras Kargo", ("araskargo.com.tr",), ("aras kargo",)),
+    Brand("Ziraat Bankası", ("ziraatbank.com.tr",), ("ziraat bankasi",)),
+    Brand("İş Bankası", ("isbank.com.tr",), ("is bankasi", "isbank")),
+    Brand("Garanti BBVA", ("garantibbva.com.tr",), ("garanti bbva",)),
+    Brand("Akbank", ("akbank.com",), ("akbank",)),
+    Brand("Yapı Kredi", ("yapikredi.com.tr",), ("yapi kredi",)),
+    Brand("Papara", ("papara.com",), ("papara",)),
+    Brand("Trendyol", ("trendyol.com",), ("trendyol",)),
+    Brand("Hepsiburada", ("hepsiburada.com",), ("hepsiburada",)),
+    Brand("sahibinden.com", ("sahibinden.com",), ("sahibinden",)),
 )
 
 # Brand labels that are also everyday words: only flagged for exact visual
 # lookalikes or when glued to phishing keywords ("outlook-verify.com").
-GENERIC_BRAND_LABELS: frozenset[str] = frozenset({"office", "outlook", "icloud", "live", "apple", "steam", "chase", "wise"})
+GENERIC_BRAND_LABELS: frozenset[str] = frozenset({"office", "outlook", "icloud", "live", "apple", "steam", "chase", "wise", "turkiye"})
 
 # Real words within one edit of a brand label; never treated as typosquats.
 NOT_TYPOSQUATS: frozenset[str] = frozenset({"finance", "cloud", "revolt", "amazing", "people", "goggles", "facebooks"})
@@ -117,6 +133,10 @@ GENERIC_ORG_WORDS: frozenset[str] = frozenset({
     "no", "reply", "info", "mail", "admin", "billing", "payments", "payment", "finance",
     "delivery", "express", "post", "parcel", "parcels", "courier", "logistics", "uk", "us",
     "global", "international", "of", "and", "&", "verify", "verification",
+    # Turkish (folded to ASCII)
+    "banka", "bankasi", "bankamiz", "guvenlik", "birimi", "birim", "musteri", "hizmetleri", "hizmet",
+    "destek", "merkezi", "merkez", "kargo", "kurye", "sirketi", "sti", "as", "genel", "mudurlugu",
+    "ekibi", "departmani", "resmi", "bilgilendirme",
 })
 
 # Tokens that, glued to a brand in a domain, suggest combosquatting
@@ -126,6 +146,10 @@ SQUAT_KEYWORDS: frozenset[str] = frozenset({
     "update", "support", "help", "service", "billing", "payment", "pay", "refund", "unlock",
     "confirm", "auth", "wallet", "official", "online", "alert", "id", "web", "portal", "customer",
     "redelivery", "delivery", "tracking", "track", "parcel", "claim", "bonus", "gift", "promo",
+    # Turkish bait words (ASCII, as they appear in domains)
+    "takip", "kargo", "iade", "odeme", "giris", "dogrulama", "guvenlik", "teslimat", "basvuru",
+    "destek", "musteri", "islem", "kampanya", "indirim", "hediye", "bilgi", "guncelleme", "sorgu",
+    "sorgulama", "onay", "ceza", "vergi",
 })
 
 # Path words common in credential-harvesting pages.
@@ -133,6 +157,16 @@ CREDENTIAL_PATH_WORDS: tuple[str, ...] = (
     "login", "log-in", "signin", "sign-in", "verify", "verification", "secure", "account",
     "update", "confirm", "unlock", "password", "wallet", "billing", "auth", "recover", "reset",
 )
+
+# Turkish letters folded to ASCII, one character to one character, so that
+# "hesabınız", "HESABINIZ" and the phone-typed "hesabiniz" all match the same pattern
+# while character offsets stay aligned with the original text.
+TURKISH_FOLD = str.maketrans("ıİşŞğĞçÇöÖüÜ", "iissggccoouu")
+
+
+def fold_turkish(text: str) -> str:
+    return text.translate(TURKISH_FOLD)
+
 
 # Characters that render like ASCII letters. Mapped to their look-alike so that
 # `pаypal` (Cyrillic а) and `paypa1` collapse to the same "skeleton" as `paypal`.
