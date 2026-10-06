@@ -4,9 +4,11 @@
 
 It is not an LLM wrapper: a deterministic rule engine, a static link analyzer, a statistical text classifier and an LLM analyst each contribute an independent signal, and the final score is a weighted fusion with safety floors.
 
+**Live demo: [trustgate-k45p.onrender.com](https://trustgate-k45p.onrender.com)** (free instance: the first request after it has been idle can take about a minute while it wakes up). Try the *Dangerous / Suspicious / Safe* example buttons.
+
 ![TrustGate flagging a fake bank security text](screenshots/01-dangerous.png)
 
-[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/hasancomert/trustgateforfinance)
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/hasancomert/trustgate)
 
 > Built for **ForgeHacks Online 2026 · AI + Cybersecurity**. All people, companies and numbers in the examples are fictional.
 
@@ -101,7 +103,7 @@ A provider-agnostic, OpenAI-compatible client (base URL, model and key come from
 Requires Python 3.11+.
 
 ```bash
-git clone https://github.com/hasancomert/trustgateforfinance && cd trustgateforfinance
+git clone https://github.com/hasancomert/trustgate && cd trustgate
 python3.11 -m venv .venv && source .venv/bin/activate
 pip install -r requirements-dev.txt && pip install -e .
 

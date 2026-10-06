@@ -36,7 +36,7 @@ MANIFEST = RAW_DIR / "MANIFEST.json"
 MB = 1024 * 1024
 TOTAL_BUDGET_BYTES = 500 * MB
 CHUNK = 256 * 1024
-USER_AGENT = "TrustGate-dataset-downloader/0.1 (+https://github.com/hasancomert/trustgateforfinance)"
+USER_AGENT = "TrustGate-dataset-downloader/0.1 (+https://github.com/hasancomert/trustgate)"
 
 
 @dataclass(frozen=True)
