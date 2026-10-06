@@ -41,23 +41,24 @@ TR_PATTERNS: dict[str, tuple[Pattern, ...]] = {
     "text.urgency": (
         _p(r"\b(acil|acilen|ivedi|ivedilikle|derhal|bir an (once|evvel)|vakit kaybetmeden|zaman kaybetmeden)\b", M),
         _p(r"\bhemen\s+(odeme|ode|gonder|yatir|tikla|giris|dogrula|islem|ara|at)\w*", M),
-        _p(r"\b(son gun|son firsat|son uyari|son hatirlatma|son bildirim)\b", M),
+        _p(r"\b(son gun|son firsat|son uyari|son hatirlatma|son bildirim)\w*", M),
         _p(r"\b\d+\s*(saat|dakika|dk)\s*(icinde|icerisinde)\b", M),
         _p(r"\bbugun\s+(icinde|odenmezse|odemezseniz|odemeniz gereken)\b", M),
         _p(r"\b(gece yarisina|gun sonuna|mesai bitimine)\s+kadar\b", M),
     ),
     "text.threat": (
-        _p(r"\b(hesab\w*|kart\w*|hatt\w*|uyelig\w*|abonelig\w*|sifre\w*)\b[^.!?\n]{0,30}\b(bloke|askiya al\w*|kapat\w*|dondur\w*|iptal edil\w*|kisitla\w*|kilitlen\w*|durdurul\w*)", H),
+        _p(r"\b(hesab\w*|kart\w*|hatt\w*|uyelig\w*|abonelig\w*|sifre\w*)\b[^.!?\n]{0,30}\b(bloke (edil|ol|konul|koyul)\w*|askiya alin\w*|kapatil\w*|kapanacak\w*|dondurul\w*|iptal edil\w*|kisitlan\w*|kilitlen\w*|durdurul\w*|engellen\w*)", H),
         _p(r"\b(hakkiniz\w*|adiniz\w*|tarafiniz\w*)\b[^.!?\n]{0,40}\b(yasal (islem|takip|surec)|icra|haciz|dava|gozalti|yakalama karari|tutuklama)", H),
-        _p(r"\b(yasal islem|icra takibi|haciz|yakalama karari|tutuklama karari)\b[^.!?\n]{0,30}\b(baslat\w*|uygulan\w*|cikarilmis\w*|cikarildi\w*)", H),
-        _p(r"\b(gecikme|ek)\s+(cezasi|faizi|ucreti)\b", M),
+        _p(r"\b(yasal islem|icra takib|haciz|yakalama karar|tutuklama karar|trafikten men|men islem|el koyma)\w*\b[^.!?\n]{0,40}\b(baslat\w*|uygulan\w*|cikaril\w*|yapilacak\w*)", H),
+        _p(r"\b(ceza|borc|faiz|tutar)\w*\s+(\w+\s+){0,2}(artacak|artirilacak|katlanacak|yukselecek|iki katina)\w*", M),
+        _p(r"\b(gecikme|ek)\s+(ceza|faiz|ucret)\w*", M),
         _p(r"\baksi (halde|takdirde)\b", M),
     ),
     "text.authority": (
-        _p(r"\b(savcilik|cumhuriyet savcisi|emniyet mudurlugu|emniyetten|siber suclar|masak|btk|vergi dairesi|gelir idaresi|jandarma)\b", M),
+        _p(r"\b(savcilig|savcilik|cumhuriyet savcis|emniyet mudurlug|emniyet|siber suclar|masak|btk|vergi daire|gelir idare|jandarma)\w*", M),
         _p(r"\b(ben|biz)\b[^.!?\n]{0,15}\b(komiser|savci|polis|banka\w* guvenlik|guvenlik birimi|musteri temsilci\w*)", M),
         _p(r"\b(guvenlik|dolandiricilik|risk|uyum)\s+(birim\w*|ekib\w*|departman\w*|merkez\w*|sorumlu\w*|yetkili\w*)", M),
-        _p(r"\b(genel mudur|mudur bey|mudur hanim|patron)\b", L),
+        _p(r"\b(genel mudur|mudur bey|mudur hanim|patron)\w*", L),
     ),
     "text.payment_change": (
         _p(r"\b(yeni|guncel|guncellenmis|degisen|farkli)\s+iban\w*", H),
@@ -93,7 +94,7 @@ TR_PATTERNS: dict[str, tuple[Pattern, ...]] = {
     ),
     "text.fee_request": (
         _p(r"\b(gumruk|kargo|teslimat|adres guncelleme|yeniden gonderim|hizmet|islem|dosya|aktivasyon|cekim)\s+(ucret\w*|bedel\w*|masraf\w*|vergi\w*)", M),
-        _p(r"\b(odenmemis|eksik|kalan|gecikmis)\s+(ucret\w*|borc\w*|bedel\w*|odeme\w*|fatura\w*|ceza\w*)", M),
+        _p(r"\b(odenmemis|eksik|kalan|gecikmis)\s+(\w+\s+){0,3}(ucret|borc|bedel|odeme|fatura|ceza)\w*", M),
         _p(r"\b(kapora\w*|kaparo\w*)", M),
     ),
     "text.cash_pickup": (
@@ -141,8 +142,11 @@ TR_PATTERNS: dict[str, tuple[Pattern, ...]] = {
         _p(r"(%\s?\d+|\byuzde\s*\d+)\s+(gunluk|haftalik|aylik)\b", H),
         _p(r"\b(gunluk|haftalik)\s+(kazanc|getiri|kar)\w*", H),
         _p(r"\b(paran\w*|yatirim\w*)\s+(ikiye|uce|iki katina|katla)\w*", H),
-        _p(r"\b(risksiz|zarar etmeden|kayip yasamadan)\b", M),
-        _p(r"\b(yatirim (firsati|grubu|danismani|danismaniniz)|sinyal grubu|borsa grubu|forex)\b", M),
+        _p(r"\b(risksiz|zarar etmeden|kayip yasamadan)\w*", M),
+        _p(r"\bzarar\s+(riski\s+|ihtimali\s+)?(yok|yoktur|olmaz|olmadan)\b", H),
+        _p(r"\b(kazanc|kar|getiri)\w*\s+(%\s?\d+\s+)?(kesin|garantili|garanti)\w*", H),
+        _p(r"%\s?\d{2,3}\s+(kazanc|kar|getiri)\w*", M),
+        _p(r"\b(yatirim (firsat|grub|danisman)|sinyal (grub|kanal)|borsa (grub|kanal)|hisse (grub|kanal|sinyal)|vip (grub|kanal|uye)|forex)\w*", M),
         _p(r"\b(kazandim|kar ettim)\b[^.!?\n]{0,30}\b(bu hafta|bugun|bir haftada|bir gunde)\b", M),
     ),
     "text.prize": (
@@ -170,7 +174,13 @@ TR_PATTERNS: dict[str, tuple[Pattern, ...]] = {
         _p(r"\b(yapay zeka|asistan\w*|ajan\w*)\b[^.!?\n]{0,20}\b(not|notu|dikkatine|talimat\w*)\b", H),
         _p(r"\b(sorumlu|iyi|yardimsever|durust|etik)\s+bir\s+(yapay zeka|asistan|dil modeli)\s+olarak\b", H),
         _p(r"\b(gelistirici modu|sistem talimat\w*|sistem istem\w*)\b", C),
-        _p(r"\b(egitim|test|deneme) amacli\b[^.!?\n]{0,60}\b(guvenli|mesru|gercek|dogrulanmis|zararsiz)\b", H),
+        _p(r"\b(egitim|test|deneme|farkindalik)\w*\s+(amacli|icin)\b[^.!?\n]{0,80}\b(guvenli|mesru|gercek degil|dogrulanmis|zararsiz|senaryo)\w*", H),
+        _p(r"\b(otomatik|yapay zeka|yz|asistan|ajan|degerlendiren|inceleme)\w*(\s+\w+){0,2}\s+icin\s*:", H),
+        _p(r"\b(guvenli|mesru|zararsiz|dolandiricilik degil)\w*\s+olarak\s+(siniflandir|etiketle|raporla)\w*", H),
+        _p(r"\brisk\s+(puan|skor)\w*\s*[:=]?\s*0\b", C),
+        _p(r"\brol\s+(yapma|oyunu|canlandirma)\w*\b[^.!?\n]{0,80}\b(guvenli|mesru|gercek degil|dolandiricilik degil|onayli)\w*", H),
+        _p(r"\b(guvenli|mesru|gercek degil|dolandiricilik degil|onayli)\w*\b[^.!?\n]{0,80}\brol\s+(yapma|oyunu|canlandirma)\w*", H),
+        _p(r"\bbase64\b[^.!?\n]{0,40}\b(coz|cevir|uygula|oku)\w*", H),
     ),
 }
 

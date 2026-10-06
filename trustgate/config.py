@@ -38,9 +38,17 @@ class Thresholds(BaseModel):
         return self
 
 
+class LLMFloor(BaseModel):
+    """A confident analyst cannot be averaged away by layers that saw nothing (e.g. rules on unseen wording)."""
+
+    min_llm_score: int = Field(default=70, ge=0, le=100)
+    floor: int = Field(default=35, ge=0, le=100)
+
+
 class ScoringSettings(BaseModel):
     weights: Weights
     thresholds: Thresholds
+    llm_floor: LLMFloor = Field(default_factory=LLMFloor)
 
 
 class RuleFloors(BaseModel):

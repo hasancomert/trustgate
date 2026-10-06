@@ -19,7 +19,7 @@ from trustgate.llm import LLMAnalyst, LLMOutcome
 from trustgate.ml import MLClassifier
 from trustgate.rules import build_engine
 from trustgate.schemas import RiskReport, VerificationRequest, Verdict
-from trustgate.scoring import ACTIONS, fuse, merge_flags, resolve_scam_type, safe_steps, template_summary, verdict_for
+from trustgate.scoring import ACTIONS, SET_ASIDE, fuse, merge_flags, resolve_scam_type, safe_steps, template_summary, verdict_for
 from trustgate.share import share_text
 
 logger = logging.getLogger(__name__)
@@ -64,7 +64,8 @@ class TrustGate:
         else:
             llm = LLMOutcome(status="skipped", detail="Quick check: the AI analyst runs as a separate step.")
 
-        score, signals = fuse(self.settings.scoring.weights, rule_result, ml_prediction.score if ml_prediction else None, llm)
+        score, signals = fuse(self.settings.scoring.weights, rule_result, ml_prediction.score if ml_prediction else None, llm,
+                              self.settings.scoring.llm_floor)
         if ml_prediction and ml_prediction.top_terms and ml_prediction.probability >= 0.5:
             signals.ml.detail = "Spam-like terms: " + ", ".join(ml_prediction.top_terms)
         if self.ml and turkish:
@@ -75,10 +76,11 @@ class TrustGate:
         # The analyst's words are only used when its own judgement agrees with the final verdict:
         # a fooled analyst ("this is fine") must not explain a message the other layers flag.
         if llm.score is not None and (llm.score >= suspicious) != (verdict is not Verdict.SAFE):
-            signals.llm.detail = (
-                f"Overruled: the AI analyst scored this {llm.score:.0f}, but the other layers outweighed it, "
-                "so its explanation is not used."
-            )
+            if signals.llm.detail != SET_ASIDE:
+                signals.llm.detail = (
+                    f"Overruled: the AI analyst scored this {llm.score:.0f}, but the other layers outweighed it, "
+                    "so its explanation is not used."
+                )
             llm = replace(llm, analysis=None, grounded_flags=[])
         scam_type = resolve_scam_type(verdict, rule_result, llm)
         # LLM phrases are only shown when the analyst itself judges the message risky.

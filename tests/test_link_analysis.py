@@ -12,6 +12,7 @@ from trustgate.rules.link_analysis import (
     skeleton,
 )
 from trustgate.rules import lexicons as lx
+from trustgate.schemas import Severity
 
 
 def rule_ids(flags):
@@ -177,3 +178,12 @@ def test_url_limit_is_respected():
     text = " ".join(f"https://site{i}.com" for i in range(30))
     findings, _ = analyze_links(text, [], LinkContext(), max_urls=5)
     assert len(findings) == 5
+
+
+def test_claimed_name_used_as_a_subdomain_disguise():
+    ctx = LinkContext(claimed_tokens=frozenset({"driftfile"}))
+    _, flags = analyze_one("https://driftfile.example.docview-share.net/s/q4", ctx)
+    flag = next(f for f in flags if f.rule_id == "link.claimed_name_in_subdomain")
+    assert flag.severity is Severity.HIGH and flag.category == "link_lookalike"
+    _, flags = analyze_one("https://files.driftfile.com/s/q4", ctx)
+    assert "link.claimed_name_in_subdomain" not in rule_ids(flags)

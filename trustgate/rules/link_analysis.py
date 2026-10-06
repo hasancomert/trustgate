@@ -377,6 +377,14 @@ def _context_issues(parsed: ParsedUrl, ctx: LinkContext, already_impersonated: b
     if ctx.claimed_tokens and not ctx.claimed_brands:
         label_sk = skeleton(parsed.registered_domain)
         claimed = " ".join(sorted(ctx.claimed_tokens))
+        sub_sk = " ".join(skeleton(label) for label in parsed.subdomain_labels)
+        in_subdomain = any(len(tok) >= 4 and skeleton(tok) in sub_sk for tok in ctx.claimed_tokens)
+        if in_subdomain and not any(skeleton(tok) in label_sk for tok in ctx.claimed_tokens):
+            return [_Issue(
+                "link.claimed_name_in_subdomain", "link_lookalike", Severity.HIGH,
+                "Sender's name used as a disguise in the link",
+                f"The link starts with the '{claimed}' name, but the site really belongs to {parsed.registered_domain}.",
+            )]
         if not any(skeleton(tok) in label_sk for tok in ctx.claimed_tokens) and parsed.registered_domain != ctx.sender_domain:
             return [_Issue(
                 "link.sender_mismatch", "link_mismatch", Severity.MEDIUM,

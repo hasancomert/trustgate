@@ -9,6 +9,7 @@ from typing import TYPE_CHECKING
 from urllib.parse import unquote_plus
 
 from trustgate.rules import lexicons as lx
+from trustgate.rules.hidden import DIRECTION_CONTROLS, TAG_END, TAG_START, HiddenText, reveal
 from trustgate.rules.link_analysis import LinkContext, analyze_links, extract_urls, lookalike_issues, parse_url, registered_domain, skeleton
 from trustgate.rules.text_rules import AGENT_RULE_ID, TEXT_RULES as _BASE_TEXT_RULES
 from trustgate.rules.text_rules_tr import with_turkish
@@ -50,6 +51,8 @@ def normalize(message: str) -> NormalizedText:
         if ch in _ZERO_WIDTH:
             hidden += 1
             continue
+        if TAG_START <= ord(ch) <= TAG_END or ch in DIRECTION_CONTROLS:
+            continue  # reported, with what they carry, by hidden.reveal()
         norm = lx.fold_turkish(_QUOTES.get(ch) or unicodedata.normalize("NFKC", ch))
         for n in norm:
             out.append(n)
@@ -171,6 +174,9 @@ class RuleResult:
     link_findings: list[LinkFinding]
     category_severity: dict[str, Severity]
     scam_type_scores: dict[ScamType, float] = field(default_factory=dict)
+    hidden: list[HiddenText] = field(default_factory=list)
+    # Official domains of brands mentioned, claimed or imitated, from the reference list (facts for the LLM).
+    reference_domains: dict[str, tuple[str, ...]] = field(default_factory=dict)
 
     @property
     def top_scam_type(self) -> ScamType | None:
@@ -209,6 +215,8 @@ class RuleEngine:
         flags += sender_flags
         flags += _payment_flags(request, ctx)
         flags += _field_injection_flags(request)
+        hidden = reveal(request.message)
+        flags += _hidden_flags(hidden)
 
         links, link_flags = analyze_links(request.message, request.urls, ctx, max_urls=self.max_urls)
         flags += link_flags
@@ -234,6 +242,8 @@ class RuleEngine:
             link_findings=links,
             category_severity=category_severity,
             scam_type_scores=_scam_type_scores(norm.text, category_severity),
+            hidden=hidden,
+            reference_domains=_reference_domains(norm.text, ctx, links),
         )
 
     # ------------------------------------------------------------------ internals
@@ -437,6 +447,54 @@ def _field_injection_flags(request: VerificationRequest) -> list[RedFlag]:
                 title=_AGENT_RULE.title,
                 explanation=f"The {label} carries instructions aimed at an AI assistant. Legitimate senders never do this.",
                 evidence=value[:160], source=source,
+            ))
+    return flags
+
+
+def _reference_domains(text: str, ctx: LinkContext, links: list[LinkFinding]) -> dict[str, tuple[str, ...]]:
+    imitated = {f.impersonated_brand for f in links if f.impersonated_brand}
+    brands = [*ctx.claimed_brands, *_mentioned_brands(text), *(b for b in lx.BRANDS if b.name in imitated)]
+    return {b.name: b.domains for b in dict.fromkeys(brands)}
+
+
+_HIDDEN_FLAGS: dict[str, tuple[str, Severity, str, str, str]] = {
+    # kind: (rule id, severity, title, explanation, where the text was found)
+    "unicode_tags": ("text.invisible_unicode_text", Severity.HIGH, "Invisible text only machines can read",
+                     "The message hides text in invisible Unicode characters: a person sees nothing, but an AI system reads it.",
+                     "invisible Unicode characters"),
+    "direction_controls": ("text.direction_controls", Severity.MEDIUM, "Text-direction tricks",
+                           "Invisible direction controls can make text display differently from what software reads.",
+                           "text-direction controls"),
+    "html_comment": ("text.hidden_html_comment", Severity.LOW, "Hidden HTML comment",
+                     "Part of the message sits in an HTML comment, which an email client does not display.",
+                     "an HTML comment"),
+    "pushed_out_of_view": ("text.pushed_out_of_view", Severity.LOW, "Text pushed out of view",
+                           "Many blank lines push part of the message below what a reader normally sees.",
+                           "text pushed far below the message"),
+    "encoded": ("text.encoded_text", Severity.LOW, "Encoded text",
+                "Part of the message is encoded (base64, HTML or URL encoding), so a reader cannot see what it says.",
+                "encoded text"),
+}
+
+
+def _hidden_flags(hidden: list[HiddenText]) -> list[RedFlag]:
+    """Flag hidden content, and treat AI instructions inside it as a critical attack."""
+    patterns = sorted(_AGENT_RULE.patterns, key=lambda p: -p.severity.rank)
+    flags: list[RedFlag] = []
+    for piece in hidden:
+        rule_id, severity, title, explanation, where = _HIDDEN_FLAGS[piece.kind]
+        visible_span = piece.kind in ("html_comment", "pushed_out_of_view", "encoded")
+        start, end = (piece.start, piece.end) if visible_span else (None, None)
+        flags.append(RedFlag(
+            rule_id=rule_id, category="obfuscation", severity=severity, title=title, explanation=explanation,
+            evidence=piece.text[:160], start=start, end=end,
+        ))
+        if piece.kind != "direction_controls" and any(p.regex.search(normalize(piece.text).text) for p in patterns):
+            flags.append(RedFlag(
+                rule_id=_AGENT_RULE.rule_id, category=_AGENT_RULE.category, severity=Severity.CRITICAL,
+                title="Hidden instructions aimed at an AI assistant",
+                explanation=f"Found in {where}: hidden from people, readable for AI systems. Legitimate messages never do this.",
+                evidence=piece.text[:160], start=start, end=end,
             ))
     return flags
 

@@ -13,6 +13,13 @@ weights = { rules = 0.45, ml = 0.20, llm = 0.35 }
 suspicious = 35
 dangerous = 70
 
+[scoring.llm_floor]
+# An analyst this sure (>= min_llm_score) holds the payment (>= floor) even when the
+# rules saw nothing: the blind evaluation found confident LLM scores diluted below 35.
+# It can only ever hold, never block, on its own.
+min_llm_score = 70
+floor = 35
+
 [rules]
 # Points contributed by a single red flag of each severity. Category scores are
 # combined with a noisy-OR so repeated weak signals saturate instead of summing.
