@@ -29,7 +29,7 @@ def _request(*roots: str) -> str:
 
 _SAY = _request("soyle", "ilet", "paylas", "gonder", "yaz", "oku", "ver", "gir", "bildir", "tusla")
 _SEND = r"(?:gonder(?!m[ae])\w*|yolla(?!m[ae])\w*|yatir(?!m[ae])\w*|havale\w*|eft|fast|atar\s?mi\w*|atabilir\s?mi\w*|atsana|ativer\w*|aktar(?!m[ae])\w*)"
-_MONEY = r"(?:\d[\d.,]*\s*(?:tl|lira|try)\b|₺\s?\d[\d.,]*)"
+_MONEY = r"(?:(?<![\d.,])\d[\d.,]{0,20}\s*(?:tl|lira|try)\b|₺\s?\d[\d.,]{0,20})"  # bounded, see text_rules._MONEY
 _CREDENTIAL = r"(?:kod\w*|sifre\w*|parola\w*|pin\b|cvv|cvc|kart bilgi\w*|kart numara\w*|tc kimlik\w*)"
 # Credential words in the same clause: "kodu kimseyle paylaşmayın" is advice, not secrecy.
 # "Kimseye söyleme, gelen kodu bana yaz" is two clauses, so the comma ends the look-ahead.

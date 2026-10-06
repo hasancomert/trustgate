@@ -240,3 +240,11 @@ def test_photo_id_is_not_a_gift_card_code(engine):
     result = run(engine, "Your parcel is at the pickup point. Bring photo ID or your collection code 4417.")
     assert "text.gift_card" not in ids(result)
     assert "text.gift_card" in ids(run(engine, "Scratch off the back and send me photos of the codes."))
+
+
+@pytest.mark.parametrize("message", ["1" * 6000, "-" * 6000, "1 tl " * 1200, "<!-- " * 1200])
+def test_adversarial_input_stays_fast(engine, message):
+    import time
+    started = time.perf_counter()
+    run(engine, "x" + message[:5999])
+    assert time.perf_counter() - started < 0.5  # quadratic backtracking took ~2 s on the digit run

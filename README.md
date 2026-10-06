@@ -138,7 +138,7 @@ python -m trustgate.ml.train        # ~1 min, writes models/tfidf_lr.joblib (add
 cp .env.example .env                # optional: set LLM_API_KEY for live AI analysis
 uvicorn app.main:app --reload       # open http://127.0.0.1:8000
 
-pytest                              # 245 tests, no network or datasets needed
+pytest                              # 251 tests, no network or datasets needed
 ```
 
 Without an API key everything still works: the LLM layer runs in mock mode and its weight is redistributed to the other layers.
@@ -379,7 +379,8 @@ sequenceDiagram
 ## Security and privacy notes
 
 - Message text and every other user-supplied field are treated as untrusted: they are fenced in the LLM prompt, scanned for instructions aimed at AI systems, rendered with `textContent` in the UI, and the page ships with a strict Content-Security-Policy (no inline scripts or styles).
-- No message contents are logged; logs contain only verdicts, scores and timings.
+- No message contents are logged; logs contain only verdicts, scores and timings. Invalid requests are rejected without echoing their text, and unexpected errors are logged as code locations only.
+- Inputs are bounded (6,000-character messages, 2,048-character URLs, 128 KB request bodies) and every pattern is fuzzed against adversarial input (long digit, dash or comment runs) so a crafted message cannot pin the CPU: the worst case we found is about 150 ms per check.
 - A process-wide cap on live LLM calls (30 a minute, 3,000 a day by default) stops a distributed flood from exhausting the provider's quota; past it, checks continue with the rules and the classifier.
 - No API keys are committed; `.env` is git-ignored. Datasets and model files are git-ignored and rebuilt by scripts.
 
