@@ -1,0 +1,27 @@
+# Datasets are downloaded by scripts/download_data.py and must never be committed
+data/
+
+# Trained model artifacts are rebuilt by `python -m trustgate.ml.train`
+models/
+
+# Secrets
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+build/
+dist/
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
