@@ -102,13 +102,32 @@ def test_scenarios_are_valid_and_balanced():
     assert sum(not s.is_scam for s in scenarios) >= 9
 
 
+def _all_scenarios(run_eval):
+    files = [run_eval.EVAL_DIR / spec.file for spec in run_eval.SETS.values()]
+    return [s for path in files if path.exists() for s in run_eval.load_scenarios(path)]
+
+
 def test_scenarios_use_fictional_brands_only():
     run_eval = _load_run_eval()
-    real = [re.compile(rf"\b{re.escape(b.name)}\b", re.IGNORECASE) for b in lx.BRANDS]
-    for s in run_eval.load_scenarios():
-        text = s.request.model_dump_json()
-        hits = [p.pattern for p in real if p.search(text)]
+    real = [re.compile(rf"\b{re.escape(name)}\b", re.IGNORECASE) for b in lx.BRANDS for name in {b.name, lx.fold_turkish(b.name)}]
+    scenarios = _all_scenarios(run_eval)
+    assert {s.lang for s in scenarios} >= {"en", "tr"}
+    for s in scenarios:
+        text = s.request.model_dump_json(exclude_none=True)
+        hits = [p.pattern for p in real if p.search(text) or p.search(lx.fold_turkish(text))]
         assert not hits, (s.id, hits)
+
+
+def test_scenario_ids_are_unique_across_sets():
+    ids = [s.id for s in _all_scenarios(_load_run_eval())]
+    assert len(ids) == len(set(ids))
+
+
+def test_turkish_set_is_valid_and_balanced():
+    run_eval = _load_run_eval()
+    scenarios = run_eval.load_scenarios(run_eval.EVAL_DIR / run_eval.SETS["tr"].file)
+    assert all(s.lang == "tr" for s in scenarios)
+    assert sum(s.is_scam for s in scenarios) >= 8 and sum(not s.is_scam for s in scenarios) >= 6
 
 
 def test_eval_metrics():

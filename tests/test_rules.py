@@ -15,6 +15,14 @@ def ids(result):
 # ------------------------------------------------------------------ normalization & spans
 
 
+def test_normalize_folds_turkish_letters_without_shifting_offsets():
+    original = "HESABINIZ İptal ŞİFRE güvenli"
+    norm = normalize(original)
+    assert norm.text == "HESABINIZ iptal siFRE guvenli"
+    assert len(norm.text) == len(original)
+    assert norm.span(10, 15) == (10, 15)
+
+
 def test_normalize_removes_zero_width_and_keeps_index_map():
     original = "gi​ft card ’"
     norm = normalize(original)

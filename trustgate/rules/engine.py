@@ -9,8 +9,11 @@ from typing import TYPE_CHECKING
 
 from trustgate.rules import lexicons as lx
 from trustgate.rules.link_analysis import LinkContext, analyze_links, lookalike_issues, parse_url, registered_domain, skeleton
-from trustgate.rules.text_rules import TEXT_RULES
+from trustgate.rules.text_rules import TEXT_RULES as _BASE_TEXT_RULES
+from trustgate.rules.text_rules_tr import with_turkish
 from trustgate.schemas import LinkFinding, RedFlag, ScamType, SenderInfo, Severity, VerificationRequest
+
+TEXT_RULES = with_turkish(_BASE_TEXT_RULES)
 
 MAX_HITS_PER_RULE = 3
 # Brand names in the opening characters read as "who is writing"; later mentions are just content.
@@ -33,7 +36,11 @@ class NormalizedText:
 
 
 def normalize(message: str) -> NormalizedText:
-    """NFKC + straight quotes + zero-width removal, keeping a map back to the original."""
+    """NFKC + straight quotes + zero-width removal + Turkish letter folding.
+
+    Every output character maps back to an original index, so red-flag spans
+    always point at the text the user typed.
+    """
     out: list[str] = []
     index_map: list[int] = []
     hidden = 0
@@ -41,7 +48,7 @@ def normalize(message: str) -> NormalizedText:
         if ch in _ZERO_WIDTH:
             hidden += 1
             continue
-        norm = _QUOTES.get(ch) or unicodedata.normalize("NFKC", ch)
+        norm = lx.fold_turkish(_QUOTES.get(ch) or unicodedata.normalize("NFKC", ch))
         for n in norm:
             out.append(n)
             index_map.append(i)
@@ -114,6 +121,21 @@ _TYPE_KEYWORDS: tuple[tuple[ScamType, re.Pattern[str], float], ...] = tuple(
         (ScamType.ROMANCE_SCAM, r"\b(visa fee|flight ticket|plane ticket|hospital bill|stuck abroad)\b", 1.0),
         (ScamType.JOB_SCAM, r"\b(job|position|salary|recruit\w*|hiring|commission)\b", 1.0),
         (ScamType.MARKETPLACE_SCAM, r"\b(overpaid|overpayment|refund the (difference|extra)|courier (will|to) (collect|pick up)|buyer|your listing|item you('re| are) selling)\b", 2.0),
+        # Turkish (matched on folded text)
+        (ScamType.FAMILY_IMPERSONATION, r"\b(anne\w*|baba\w*|abla\w*|abi\w*|kardes\w*|oglum|kizim|teyze\w*|dayi\w*|amca\w*|hala\w*|nine\w*|nene\w*|dede\w*)\b", 2.0),
+        (ScamType.FAKE_DELIVERY, r"\b(kargo\w*|paket\w*|gonderi\w*|teslimat\w*|gumruk\w*|ptt)\b", 2.0),
+        (ScamType.BANK_IMPERSONATION, r"\b(banka\w*|kredi kart\w*|banka kart\w*|supheli islem\w*|izinsiz islem\w*)\b", 1.5),
+        (ScamType.BANK_IMPERSONATION, r"\b(kartiniz\w*|subeye|subenize|guvenlik birim\w*|musteri temsilci\w*)\b", 1.0),
+        (ScamType.GOVERNMENT_IMPERSONATION, r"\b(e-?devlet|vergi\w*|maliye|sgk|trafik ceza\w*|hgs|ogs|mahkeme\w*|savcilik\w*|emniyet\w*|icra\w*|tapu)\b", 1.5),
+        (ScamType.GOVERNMENT_IMPERSONATION, r"\b(komiser\w*|polis\w*|jandarma\w*|sorusturma\w*|yakalama karari|vergi iade\w*|iadeniz)\b", 1.5),
+        (ScamType.INVESTMENT_SCAM, r"\b(yatirim\w*|borsa\w*|kripto\w*|forex|getiri\w*|kazanc\w*|kar payi)\b", 1.5),
+        (ScamType.PRIZE_LOTTERY, r"\b(cekilis\w*|odul\w*|ikramiye\w*|kazandiniz|talihli\w*)\b", 1.5),
+        (ScamType.ROMANCE_SCAM, r"\b(canim|askim|sevgilim|bebegim|hayatim)\b", 2.0),
+        (ScamType.JOB_SCAM, r"\b(is ilan\w*|is firsati|evden calis\w*|gorev\w*|komisyon\w*|maas\w*)\b", 1.0),
+        (ScamType.MARKETPLACE_SCAM, r"\b(ilan\w*|alici\w*|satici\w*)\b", 1.5),
+        (ScamType.MARKETPLACE_SCAM, r"\b(kapora\w*|kaparo\w*)\b", 2.0),
+        (ScamType.ACCOUNT_PHISHING, r"\b(sifre\w*|giris yap\w*|oturum\w*)\b", 1.0),
+        (ScamType.TECH_SUPPORT, r"\b(virus\w*|hacklen\w*|ele gecir\w*|teknik destek)\b", 2.0),
     )
 )
 
@@ -304,16 +326,21 @@ def _mentioned_brands(text: str) -> tuple[lx.Brand, ...]:
     return tuple(b for b, patterns in _BRAND_MENTIONS if any(p.search(text) for p in patterns))
 
 
+def _words(name: str) -> list[str]:
+    # Fold before lower(): "İ".lower() would add a combining dot.
+    return [t.lower() for t in _WORD.findall(lx.fold_turkish(name))]
+
+
 def _org_tokens(name: str | None) -> frozenset[str]:
     if not name:
         return frozenset()
-    return frozenset(w for w in (t.lower() for t in _WORD.findall(name)) if len(w) >= 3 and w not in lx.GENERIC_ORG_WORDS)
+    return frozenset(w for w in _words(name) if len(w) >= 3 and w not in lx.GENERIC_ORG_WORDS)
 
 
 def _looks_like_org(name: str | None) -> bool:
     if not name:
         return False
-    words = {t.lower() for t in _WORD.findall(name)}
+    words = set(_words(name))
     return bool(words & lx.GENERIC_ORG_WORDS - {"the", "of", "and", "no", "co", "us", "uk"})
 
 
@@ -382,6 +409,10 @@ def _sender_analysis(sender: SenderInfo | None, mentioned: tuple[lx.Brand, ...])
     return flags, ctx
 
 
+# A "large" first payment, in units of the payment currency; 1000 for currencies close to USD/EUR/GBP.
+_LARGE_AMOUNT = {"TRY": 40_000, "JPY": 150_000, "INR": 85_000}
+
+
 def _payment_flags(request: VerificationRequest, ctx: LinkContext) -> list[RedFlag]:
     payment = request.payment
     if payment is None:
@@ -404,7 +435,7 @@ def _payment_flags(request: VerificationRequest, ctx: LinkContext) -> list[RedFl
         ))
 
     if payment.new_payee:
-        large = payment.amount is not None and payment.amount >= 1000
+        large = payment.amount is not None and payment.amount >= _LARGE_AMOUNT.get((payment.currency or "").upper(), 1000)
         flags.append(RedFlag(
             rule_id="payment.new_payee", category="new_payee", severity=Severity.MEDIUM if large else Severity.LOW,
             title="First payment to this recipient" + (" (large amount)" if large else ""),

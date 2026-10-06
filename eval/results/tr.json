@@ -1,0 +1,782 @@
+{
+  "set": "tr",
+  "title": "Turkish scenarios (development)",
+  "note": "Hand-written while the Turkish rule pack was developed, so these numbers are optimistic.",
+  "generated_at": "2026-10-06T18:24:14+00:00",
+  "threshold": 35,
+  "modes": {
+    "rules": {
+      "metrics": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "accuracy": 1.0,
+        "confusion_matrix": {
+          "tn": 7,
+          "fp": 0,
+          "fn": 0,
+          "tp": 9
+        },
+        "scam_type_accuracy": 1.0
+      },
+      "per_scenario": [
+        {
+          "id": "T01",
+          "lang": "tr",
+          "label": "scam",
+          "expected_type": "family_impersonation",
+          "score": 84.8,
+          "flagged": true,
+          "predicted_type": "family_impersonation",
+          "llm_score": null,
+          "llm_status": null
+        },
+        {
+          "id": "T02",
+          "lang": "tr",
+          "label": "scam",
+          "expected_type": "government_impersonation",
+          "score": 88.5,
+          "flagged": true,
+          "predicted_type": "government_impersonation",
+          "llm_score": null,
+          "llm_status": null
+        },
+        {
+          "id": "T03",
+          "lang": "tr",
+          "label": "scam",
+          "expected_type": "fake_delivery",
+          "score": 80.0,
+          "flagged": true,
+          "predicted_type": "fake_delivery",
+          "llm_score": null,
+          "llm_status": null
+        },
+        {
+          "id": "T04",
+          "lang": "tr",
+          "label": "scam",
+          "expected_type": "bank_impersonation",
+          "score": 73.6,
+          "flagged": true,
+          "predicted_type": "bank_impersonation",
+          "llm_score": null,
+          "llm_status": null
+        },
+        {
+          "id": "T05",
+          "lang": "tr",
+          "label": "scam",
+          "expected_type": "government_impersonation",
+          "score": 52.9,
+          "flagged": true,
+          "predicted_type": "government_impersonation",
+          "llm_score": null,
+          "llm_status": null
+        },
+        {
+          "id": "T06",
+          "lang": "tr",
+          "label": "scam",
+          "expected_type": "investment_scam",
+          "score": 80.0,
+          "flagged": true,
+          "predicted_type": "investment_scam",
+          "llm_score": null,
+          "llm_status": null
+        },
+        {
+          "id": "T07",
+          "lang": "tr",
+          "label": "scam",
+          "expected_type": "marketplace_scam",
+          "score": 56.7,
+          "flagged": true,
+          "predicted_type": "marketplace_scam",
+          "llm_score": null,
+          "llm_status": null
+        },
+        {
+          "id": "T08",
+          "lang": "tr",
+          "label": "scam",
+          "expected_type": "job_scam",
+          "score": 80.0,
+          "flagged": true,
+          "predicted_type": "job_scam",
+          "llm_score": null,
+          "llm_status": null
+        },
+        {
+          "id": "T09",
+          "lang": "tr",
+          "label": "scam",
+          "expected_type": "other",
+          "score": 88.7,
+          "flagged": true,
+          "predicted_type": "ceo_invoice_fraud",
+          "llm_score": null,
+          "llm_status": null
+        },
+        {
+          "id": "LT1",
+          "lang": "tr",
+          "label": "legit",
+          "expected_type": "none",
+          "score": 0.0,
+          "flagged": false,
+          "predicted_type": null,
+          "llm_score": null,
+          "llm_status": null
+        },
+        {
+          "id": "LT2",
+          "lang": "tr",
+          "label": "legit",
+          "expected_type": "none",
+          "score": 0.0,
+          "flagged": false,
+          "predicted_type": null,
+          "llm_score": null,
+          "llm_status": null
+        },
+        {
+          "id": "LT3",
+          "lang": "tr",
+          "label": "legit",
+          "expected_type": "none",
+          "score": 0.0,
+          "flagged": false,
+          "predicted_type": null,
+          "llm_score": null,
+          "llm_status": null
+        },
+        {
+          "id": "LT4",
+          "lang": "tr",
+          "label": "legit",
+          "expected_type": "none",
+          "score": 8.0,
+          "flagged": false,
+          "predicted_type": null,
+          "llm_score": null,
+          "llm_status": null
+        },
+        {
+          "id": "LT5",
+          "lang": "tr",
+          "label": "legit",
+          "expected_type": "none",
+          "score": 0.0,
+          "flagged": false,
+          "predicted_type": null,
+          "llm_score": null,
+          "llm_status": null
+        },
+        {
+          "id": "LT6",
+          "lang": "tr",
+          "label": "legit",
+          "expected_type": "none",
+          "score": 18.0,
+          "flagged": false,
+          "predicted_type": null,
+          "llm_score": null,
+          "llm_status": null
+        },
+        {
+          "id": "LT7",
+          "lang": "tr",
+          "label": "legit",
+          "expected_type": "none",
+          "score": 0.0,
+          "flagged": false,
+          "predicted_type": null,
+          "llm_score": null,
+          "llm_status": null
+        }
+      ]
+    },
+    "ml": {
+      "metrics": {
+        "precision": 1.0,
+        "recall": 0.111,
+        "f1": 0.2,
+        "accuracy": 0.5,
+        "confusion_matrix": {
+          "tn": 7,
+          "fp": 0,
+          "fn": 8,
+          "tp": 1
+        }
+      },
+      "per_scenario": [
+        {
+          "id": "T01",
+          "lang": "tr",
+          "label": "scam",
+          "expected_type": "family_impersonation",
+          "score": 38.2,
+          "flagged": false,
+          "predicted_type": null,
+          "llm_score": null,
+          "llm_status": null
+        },
+        {
+          "id": "T02",
+          "lang": "tr",
+          "label": "scam",
+          "expected_type": "government_impersonation",
+          "score": 59.3,
+          "flagged": true,
+          "predicted_type": null,
+          "llm_score": null,
+          "llm_status": null
+        },
+        {
+          "id": "T03",
+          "lang": "tr",
+          "label": "scam",
+          "expected_type": "fake_delivery",
+          "score": 28.3,
+          "flagged": false,
+          "predicted_type": null,
+          "llm_score": null,
+          "llm_status": null
+        },
+        {
+          "id": "T04",
+          "lang": "tr",
+          "label": "scam",
+          "expected_type": "bank_impersonation",
+          "score": 47.8,
+          "flagged": false,
+          "predicted_type": null,
+          "llm_score": null,
+          "llm_status": null
+        },
+        {
+          "id": "T05",
+          "lang": "tr",
+          "label": "scam",
+          "expected_type": "government_impersonation",
+          "score": 27.3,
+          "flagged": false,
+          "predicted_type": null,
+          "llm_score": null,
+          "llm_status": null
+        },
+        {
+          "id": "T06",
+          "lang": "tr",
+          "label": "scam",
+          "expected_type": "investment_scam",
+          "score": 49.7,
+          "flagged": false,
+          "predicted_type": null,
+          "llm_score": null,
+          "llm_status": null
+        },
+        {
+          "id": "T07",
+          "lang": "tr",
+          "label": "scam",
+          "expected_type": "marketplace_scam",
+          "score": 8.5,
+          "flagged": false,
+          "predicted_type": null,
+          "llm_score": null,
+          "llm_status": null
+        },
+        {
+          "id": "T08",
+          "lang": "tr",
+          "label": "scam",
+          "expected_type": "job_scam",
+          "score": 22.7,
+          "flagged": false,
+          "predicted_type": null,
+          "llm_score": null,
+          "llm_status": null
+        },
+        {
+          "id": "T09",
+          "lang": "tr",
+          "label": "scam",
+          "expected_type": "other",
+          "score": 25.4,
+          "flagged": false,
+          "predicted_type": null,
+          "llm_score": null,
+          "llm_status": null
+        },
+        {
+          "id": "LT1",
+          "lang": "tr",
+          "label": "legit",
+          "expected_type": "none",
+          "score": 40.5,
+          "flagged": false,
+          "predicted_type": null,
+          "llm_score": null,
+          "llm_status": null
+        },
+        {
+          "id": "LT2",
+          "lang": "tr",
+          "label": "legit",
+          "expected_type": "none",
+          "score": 1.6,
+          "flagged": false,
+          "predicted_type": null,
+          "llm_score": null,
+          "llm_status": null
+        },
+        {
+          "id": "LT3",
+          "lang": "tr",
+          "label": "legit",
+          "expected_type": "none",
+          "score": 9.1,
+          "flagged": false,
+          "predicted_type": null,
+          "llm_score": null,
+          "llm_status": null
+        },
+        {
+          "id": "LT4",
+          "lang": "tr",
+          "label": "legit",
+          "expected_type": "none",
+          "score": 30.6,
+          "flagged": false,
+          "predicted_type": null,
+          "llm_score": null,
+          "llm_status": null
+        },
+        {
+          "id": "LT5",
+          "lang": "tr",
+          "label": "legit",
+          "expected_type": "none",
+          "score": 7.8,
+          "flagged": false,
+          "predicted_type": null,
+          "llm_score": null,
+          "llm_status": null
+        },
+        {
+          "id": "LT6",
+          "lang": "tr",
+          "label": "legit",
+          "expected_type": "none",
+          "score": 38.0,
+          "flagged": false,
+          "predicted_type": null,
+          "llm_score": null,
+          "llm_status": null
+        },
+        {
+          "id": "LT7",
+          "lang": "tr",
+          "label": "legit",
+          "expected_type": "none",
+          "score": 22.6,
+          "flagged": false,
+          "predicted_type": null,
+          "llm_score": null,
+          "llm_status": null
+        }
+      ]
+    },
+    "fused-mock": {
+      "metrics": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "accuracy": 1.0,
+        "confusion_matrix": {
+          "tn": 7,
+          "fp": 0,
+          "fn": 0,
+          "tp": 9
+        },
+        "scam_type_accuracy": 1.0,
+        "median_latency_ms": 1
+      },
+      "per_scenario": [
+        {
+          "id": "T01",
+          "lang": "tr",
+          "label": "scam",
+          "expected_type": "family_impersonation",
+          "score": 85.0,
+          "flagged": true,
+          "predicted_type": "family_impersonation",
+          "llm_score": null,
+          "llm_status": "mock"
+        },
+        {
+          "id": "T02",
+          "lang": "tr",
+          "label": "scam",
+          "expected_type": "government_impersonation",
+          "score": 88.0,
+          "flagged": true,
+          "predicted_type": "government_impersonation",
+          "llm_score": null,
+          "llm_status": "mock"
+        },
+        {
+          "id": "T03",
+          "lang": "tr",
+          "label": "scam",
+          "expected_type": "fake_delivery",
+          "score": 80.0,
+          "flagged": true,
+          "predicted_type": "fake_delivery",
+          "llm_score": null,
+          "llm_status": "mock"
+        },
+        {
+          "id": "T04",
+          "lang": "tr",
+          "label": "scam",
+          "expected_type": "bank_impersonation",
+          "score": 74.0,
+          "flagged": true,
+          "predicted_type": "bank_impersonation",
+          "llm_score": null,
+          "llm_status": "mock"
+        },
+        {
+          "id": "T05",
+          "lang": "tr",
+          "label": "scam",
+          "expected_type": "government_impersonation",
+          "score": 53.0,
+          "flagged": true,
+          "predicted_type": "government_impersonation",
+          "llm_score": null,
+          "llm_status": "mock"
+        },
+        {
+          "id": "T06",
+          "lang": "tr",
+          "label": "scam",
+          "expected_type": "investment_scam",
+          "score": 80.0,
+          "flagged": true,
+          "predicted_type": "investment_scam",
+          "llm_score": null,
+          "llm_status": "mock"
+        },
+        {
+          "id": "T07",
+          "lang": "tr",
+          "label": "scam",
+          "expected_type": "marketplace_scam",
+          "score": 57.0,
+          "flagged": true,
+          "predicted_type": "marketplace_scam",
+          "llm_score": null,
+          "llm_status": "mock"
+        },
+        {
+          "id": "T08",
+          "lang": "tr",
+          "label": "scam",
+          "expected_type": "job_scam",
+          "score": 80.0,
+          "flagged": true,
+          "predicted_type": "job_scam",
+          "llm_score": null,
+          "llm_status": "mock"
+        },
+        {
+          "id": "T09",
+          "lang": "tr",
+          "label": "scam",
+          "expected_type": "other",
+          "score": 89.0,
+          "flagged": true,
+          "predicted_type": "ceo_invoice_fraud",
+          "llm_score": null,
+          "llm_status": "mock"
+        },
+        {
+          "id": "LT1",
+          "lang": "tr",
+          "label": "legit",
+          "expected_type": "none",
+          "score": 0.0,
+          "flagged": false,
+          "predicted_type": null,
+          "llm_score": null,
+          "llm_status": "mock"
+        },
+        {
+          "id": "LT2",
+          "lang": "tr",
+          "label": "legit",
+          "expected_type": "none",
+          "score": 0.0,
+          "flagged": false,
+          "predicted_type": null,
+          "llm_score": null,
+          "llm_status": "mock"
+        },
+        {
+          "id": "LT3",
+          "lang": "tr",
+          "label": "legit",
+          "expected_type": "none",
+          "score": 0.0,
+          "flagged": false,
+          "predicted_type": null,
+          "llm_score": null,
+          "llm_status": "mock"
+        },
+        {
+          "id": "LT4",
+          "lang": "tr",
+          "label": "legit",
+          "expected_type": "none",
+          "score": 8.0,
+          "flagged": false,
+          "predicted_type": null,
+          "llm_score": null,
+          "llm_status": "mock"
+        },
+        {
+          "id": "LT5",
+          "lang": "tr",
+          "label": "legit",
+          "expected_type": "none",
+          "score": 0.0,
+          "flagged": false,
+          "predicted_type": null,
+          "llm_score": null,
+          "llm_status": "mock"
+        },
+        {
+          "id": "LT6",
+          "lang": "tr",
+          "label": "legit",
+          "expected_type": "none",
+          "score": 18.0,
+          "flagged": false,
+          "predicted_type": null,
+          "llm_score": null,
+          "llm_status": "mock"
+        },
+        {
+          "id": "LT7",
+          "lang": "tr",
+          "label": "legit",
+          "expected_type": "none",
+          "score": 0.0,
+          "flagged": false,
+          "predicted_type": null,
+          "llm_score": null,
+          "llm_status": "mock"
+        }
+      ]
+    },
+    "fused-live": {
+      "metrics": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "accuracy": 1.0,
+        "confusion_matrix": {
+          "tn": 7,
+          "fp": 0,
+          "fn": 0,
+          "tp": 9
+        },
+        "scam_type_accuracy": 1.0,
+        "median_latency_ms": 8522
+      },
+      "per_scenario": [
+        {
+          "id": "T01",
+          "lang": "tr",
+          "label": "scam",
+          "expected_type": "family_impersonation",
+          "score": 87.0,
+          "flagged": true,
+          "predicted_type": "family_impersonation",
+          "llm_score": 90.0,
+          "llm_status": "ok"
+        },
+        {
+          "id": "T02",
+          "lang": "tr",
+          "label": "scam",
+          "expected_type": "government_impersonation",
+          "score": 91.0,
+          "flagged": true,
+          "predicted_type": "government_impersonation",
+          "llm_score": 95.0,
+          "llm_status": "ok"
+        },
+        {
+          "id": "T03",
+          "lang": "tr",
+          "label": "scam",
+          "expected_type": "fake_delivery",
+          "score": 80.0,
+          "flagged": true,
+          "predicted_type": "fake_delivery",
+          "llm_score": 75.0,
+          "llm_status": "ok"
+        },
+        {
+          "id": "T04",
+          "lang": "tr",
+          "label": "scam",
+          "expected_type": "bank_impersonation",
+          "score": 81.0,
+          "flagged": true,
+          "predicted_type": "bank_impersonation",
+          "llm_score": 90.0,
+          "llm_status": "ok"
+        },
+        {
+          "id": "T05",
+          "lang": "tr",
+          "label": "scam",
+          "expected_type": "government_impersonation",
+          "score": 67.0,
+          "flagged": true,
+          "predicted_type": "government_impersonation",
+          "llm_score": 85.0,
+          "llm_status": "ok"
+        },
+        {
+          "id": "T06",
+          "lang": "tr",
+          "label": "scam",
+          "expected_type": "investment_scam",
+          "score": 84.0,
+          "flagged": true,
+          "predicted_type": "investment_scam",
+          "llm_score": 95.0,
+          "llm_status": "ok"
+        },
+        {
+          "id": "T07",
+          "lang": "tr",
+          "label": "scam",
+          "expected_type": "marketplace_scam",
+          "score": 58.0,
+          "flagged": true,
+          "predicted_type": "marketplace_scam",
+          "llm_score": 60.0,
+          "llm_status": "ok"
+        },
+        {
+          "id": "T08",
+          "lang": "tr",
+          "label": "scam",
+          "expected_type": "job_scam",
+          "score": 80.0,
+          "flagged": true,
+          "predicted_type": "job_scam",
+          "llm_score": 85.0,
+          "llm_status": "ok"
+        },
+        {
+          "id": "T09",
+          "lang": "tr",
+          "label": "scam",
+          "expected_type": "other",
+          "score": 91.0,
+          "flagged": true,
+          "predicted_type": "ceo_invoice_fraud",
+          "llm_score": 95.0,
+          "llm_status": "ok"
+        },
+        {
+          "id": "LT1",
+          "lang": "tr",
+          "label": "legit",
+          "expected_type": "none",
+          "score": 4.0,
+          "flagged": false,
+          "predicted_type": null,
+          "llm_score": 10.0,
+          "llm_status": "ok"
+        },
+        {
+          "id": "LT2",
+          "lang": "tr",
+          "label": "legit",
+          "expected_type": "none",
+          "score": 0.0,
+          "flagged": false,
+          "predicted_type": null,
+          "llm_score": 0.0,
+          "llm_status": "ok"
+        },
+        {
+          "id": "LT3",
+          "lang": "tr",
+          "label": "legit",
+          "expected_type": "none",
+          "score": 0.0,
+          "flagged": false,
+          "predicted_type": null,
+          "llm_score": 0.0,
+          "llm_status": "ok"
+        },
+        {
+          "id": "LT4",
+          "lang": "tr",
+          "label": "legit",
+          "expected_type": "none",
+          "score": 13.0,
+          "flagged": false,
+          "predicted_type": null,
+          "llm_score": 20.0,
+          "llm_status": "ok"
+        },
+        {
+          "id": "LT5",
+          "lang": "tr",
+          "label": "legit",
+          "expected_type": "none",
+          "score": 0.0,
+          "flagged": false,
+          "predicted_type": null,
+          "llm_score": 0.0,
+          "llm_status": "ok"
+        },
+        {
+          "id": "LT6",
+          "lang": "tr",
+          "label": "legit",
+          "expected_type": "none",
+          "score": 19.0,
+          "flagged": false,
+          "predicted_type": null,
+          "llm_score": 20.0,
+          "llm_status": "ok"
+        },
+        {
+          "id": "LT7",
+          "lang": "tr",
+          "label": "legit",
+          "expected_type": "none",
+          "score": 9.0,
+          "flagged": false,
+          "predicted_type": null,
+          "llm_score": 20.0,
+          "llm_status": "ok"
+        }
+      ]
+    }
+  }
+}
