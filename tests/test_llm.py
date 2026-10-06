@@ -1,3 +1,5 @@
+import re
+
 import pytest
 
 from trustgate.config import load_settings
@@ -11,15 +13,21 @@ from trustgate.schemas import PaymentDetails, ScamType, SenderInfo, Verification
 
 
 class FakeClient:
+    """Stands in for the provider. Like a well-behaved model it echoes the request's integrity code,
+    unless `echo_nonce=False` simulates a verdict written in advance."""
+
     model = "fake/model"
 
-    def __init__(self, reply=None, error=None):
-        self.reply, self.error, self.calls = reply, error, []
+    def __init__(self, reply=None, error=None, echo_nonce=True):
+        self.reply, self.error, self.echo_nonce, self.calls = reply, error, echo_nonce, []
 
     def complete_json(self, system, user):
         self.calls.append((system, user))
         if self.error:
             raise self.error
+        code = re.search(r"Integrity code for this request: (\w+)", user)
+        if self.echo_nonce and code and isinstance(self.reply, dict):
+            return {**self.reply, "nonce": code.group(1)}
         return self.reply
 
 

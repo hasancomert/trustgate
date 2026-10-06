@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from trustgate.config import Thresholds, Weights
+from trustgate.config import LLMFloor, Thresholds, Weights
 from trustgate.llm import LLMOutcome
 from trustgate.rules import RuleResult
 from trustgate.schemas import (
@@ -20,11 +20,21 @@ from trustgate.schemas import (
 # ---------------------------------------------------------------------- fusion
 
 
-def fuse(weights: Weights, rule_result: RuleResult, ml_score: float | None, llm: LLMOutcome) -> tuple[int, SignalBreakdown]:
+SET_ASIDE = "Set aside: this message tries to instruct AI systems, so the analyst may add risk but not remove it."
+
+
+def _weighted(active: dict[str, float], raw: dict) -> float:
+    return sum(active[name] * raw[name][0] for name in active) / (sum(active.values()) or 1.0)
+
+
+def fuse(weights: Weights, rule_result: RuleResult, ml_score: float | None, llm: LLMOutcome,
+         llm_floor: LLMFloor | None = None) -> tuple[int, SignalBreakdown]:
     """Weighted average of the available layers, then the rule floor.
 
     Layers without a real score (ML model missing, LLM in mock/fallback mode)
-    get weight 0 and their share is redistributed over the others.
+    get weight 0 and their share is redistributed over the others. When the
+    message carries instructions aimed at AI systems, the analyst may have been
+    manipulated, so its score only counts if it raises the risk.
     """
     raw = {
         "rules": (rule_result.score, "ok", None),
@@ -33,10 +43,17 @@ def fuse(weights: Weights, rule_result: RuleResult, ml_score: float | None, llm:
     }
     configured = {"rules": weights.rules, "ml": weights.ml, "llm": weights.llm}
     active = {name: w for name, w in configured.items() if raw[name][0] is not None and w > 0}
+    if "llm" in active and "agent_manipulation" in rule_result.category_severity:
+        others = {name: w for name, w in active.items() if name != "llm"}
+        if others and raw["llm"][0] < _weighted(others, raw):
+            active = others
+            raw["llm"] = (llm.score, llm.status, SET_ASIDE)
     total = sum(active.values()) or 1.0
-    weighted = sum(active[name] * raw[name][0] for name in active) / total
+    weighted = _weighted(active, raw)
 
     floor = rule_result.floor
+    if llm_floor and llm.score is not None and llm.score >= llm_floor.min_llm_score:
+        floor = max(floor or 0, llm_floor.floor)
     final = max(weighted, float(floor or 0))
     signals = {
         name: LayerSignal(

@@ -161,7 +161,7 @@ CREDENTIAL_PATH_WORDS: tuple[str, ...] = (
 # Turkish letters folded to ASCII, one character to one character, so that
 # "hesabınız", "HESABINIZ" and the phone-typed "hesabiniz" all match the same pattern
 # while character offsets stay aligned with the original text.
-TURKISH_FOLD = str.maketrans("ıİşŞğĞçÇöÖüÜ", "iissggccoouu")
+TURKISH_FOLD = str.maketrans("ıİşŞğĞçÇöÖüÜâÂîÎûÛ", "iissggccoouuaaiiuu")
 
 
 def fold_turkish(text: str) -> str:

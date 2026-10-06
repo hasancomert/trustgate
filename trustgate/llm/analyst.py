@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import hashlib
 import logging
+import secrets
 import threading
 import time
 from collections import OrderedDict
@@ -22,6 +23,7 @@ from trustgate.config import LLMSettings
 from trustgate.llm.budget import CallBudget
 from trustgate.llm.client import ChatClient, LLMError, OpenAICompatibleClient
 from trustgate.llm.prompts import SYSTEM_PROMPT, build_user_prompt
+from trustgate.llm.sanitize import defang
 from trustgate.ml import MLPrediction
 from trustgate.rules import RuleResult
 from trustgate.schemas import RedFlag, ScamType, Severity, VerificationRequest
@@ -32,9 +34,14 @@ CACHE_SIZE = 256
 
 
 class LLMFlag(BaseModel):
-    quote: str = ""
+    quote: str = ""  # checked against the message itself, so left as written
     tactic: str = ""
     why: str = ""
+
+    @field_validator("tactic", "why", mode="before")
+    @classmethod
+    def _defang(cls, v: Any) -> str:
+        return defang(str(v or ""))
 
 
 class LLMAnalysis(BaseModel):
@@ -46,6 +53,7 @@ class LLMAnalysis(BaseModel):
     summary: str = Field(min_length=1)
     red_flags: list[LLMFlag] = Field(default_factory=list)
     safe_steps: list[str] = Field(default_factory=list)
+    nonce: str = ""
 
     @field_validator("risk_score", mode="before")
     @classmethod
@@ -71,7 +79,7 @@ class LLMAnalysis(BaseModel):
     @field_validator("summary", mode="before")
     @classmethod
     def _trim_summary(cls, v: Any) -> str:
-        return str(v).strip()[:700]
+        return defang(str(v).strip()[:700])
 
     @field_validator("red_flags", mode="before")
     @classmethod
@@ -81,7 +89,12 @@ class LLMAnalysis(BaseModel):
     @field_validator("safe_steps", mode="before")
     @classmethod
     def _limit_steps(cls, v: Any) -> list[str]:
-        return [str(s).strip()[:240] for s in (v or []) if str(s).strip()][:5]
+        return [defang(str(s).strip()[:240]) for s in (v or []) if str(s).strip()][:5]
+
+    @field_validator("nonce", mode="before")
+    @classmethod
+    def _nonce_text(cls, v: Any) -> str:
+        return str(v or "").strip()
 
 
 LLMStatus = Literal["ok", "mock", "fallback", "skipped"]
@@ -145,6 +158,7 @@ class LLMAnalyst:
         if self.mode == "mock":
             return LLMOutcome(status="mock", detail="No LLM API key configured; explanation generated from rule signals.")
 
+        # The cache key leaves out the per-request integrity code; cached answers already passed the check.
         user_prompt = build_user_prompt(request, rule_result, ml, self.max_message_chars)
         key = hashlib.sha256(f"{self.settings.model}\n{SYSTEM_PROMPT}\n{user_prompt}".encode()).hexdigest()
         started = time.perf_counter()
@@ -162,14 +176,20 @@ class LLMAnalyst:
             period = "daily" if limit == "day" else "per-minute"
             return LLMOutcome(status="fallback", detail=f"The AI analyst's {period} usage limit was reached; explanation generated from rule signals.")
 
+        nonce = secrets.token_hex(4)
         try:
             client = self._get_client()
-            raw = client.complete_json(SYSTEM_PROMPT, user_prompt)
+            raw = client.complete_json(SYSTEM_PROMPT, build_user_prompt(request, rule_result, ml, self.max_message_chars, nonce=nonce))
             analysis = LLMAnalysis.model_validate(raw)
         except (LLMError, ValueError) as exc:
             logger.warning("LLM analysis failed (%s); falling back to rule-based explanation.", type(exc).__name__)
             return LLMOutcome(status="fallback", detail=f"LLM unavailable ({type(exc).__name__}); explanation generated from rule signals.",
                               latency_ms=int((time.perf_counter() - started) * 1000))
+        if analysis.nonce != nonce:
+            # A verdict written in advance (e.g. planted in the message) cannot know this request's code.
+            logger.warning("LLM answer failed the integrity check; falling back to rule-based explanation.")
+            return LLMOutcome(status="fallback", detail="The AI analyst's answer failed an integrity check (possible prompt injection); "
+                              "explanation generated from rule signals.", latency_ms=int((time.perf_counter() - started) * 1000))
 
         with self._lock:
             self._cache[key] = (analysis, client.model)

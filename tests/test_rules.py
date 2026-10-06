@@ -226,3 +226,17 @@ def test_remote_access_needs_context(engine):
 def test_confidential_case_is_secrecy(engine):
     assert "text.secrecy" in ids(run(engine, "Do not tell anyone, this case is confidential."))
     assert "text.secrecy" not in ids(run(engine, "This email and any attachments may contain confidential information."))
+
+
+@pytest.mark.parametrize("message", [
+    "Hi Sam, our bank details changed, please pay invoice INV-22 to the new account.",
+    "Our payment information will change next week; transfer the balance into our new account.",
+])
+def test_changed_details_without_auxiliary_verbs(engine, message):
+    assert "text.payment_change" in ids(run(engine, message))
+
+
+def test_photo_id_is_not_a_gift_card_code(engine):
+    result = run(engine, "Your parcel is at the pickup point. Bring photo ID or your collection code 4417.")
+    assert "text.gift_card" not in ids(result)
+    assert "text.gift_card" in ids(run(engine, "Scratch off the back and send me photos of the codes."))

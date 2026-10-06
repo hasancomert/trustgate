@@ -2,10 +2,12 @@
 """Evaluate TrustGate layers on scenario sets + summarize held-out ML metrics.
 
 Sets (eval/*.jsonl):
-    dev        English scenarios written while the rules were developed
-    tr         Turkish scenarios written while the Turkish rule pack was developed
-    blind      English + Turkish scenarios written after the rules were frozen
-    injection  scams that try to instruct the AI analyst (prompt injection)
+    dev         English scenarios written while the rules were developed
+    tr          Turkish scenarios written while the Turkish rule pack was developed
+    blind       English + Turkish, written blind after the v1 freeze (seen since; v1 results in results/v1)
+    injection   prompt-injection attacks, written blind after the v1 freeze (seen since)
+    blind2      English + Turkish, written blind after the v2 freeze
+    injection2  prompt-injection attacks, written blind after the v2 freeze
 
 Modes:
     rules       rule engine only (score = max(rule score, floor))
@@ -56,13 +58,20 @@ SETS: dict[str, ScenarioSet] = {
                        "Hand-written while the rules were developed, so these numbers are optimistic."),
     "tr": ScenarioSet("scenarios_tr.jsonl", "Turkish scenarios (development)",
                       "Hand-written while the Turkish rule pack was developed, so these numbers are optimistic."),
-    "blind": ScenarioSet("scenarios_blind.jsonl", "Blind scenarios (English + Turkish)",
-                         "Written by a separate agent that never saw the rules, after they were frozen; committed before "
-                         "the first run and evaluated once. No rules were changed after seeing the results."),
-    "injection": ScenarioSet("scenarios_injection.jsonl", "Prompt-injection robustness",
+    "blind": ScenarioSet("scenarios_blind.jsonl", "Blind set 1 (English + Turkish), seen since v1",
+                         "Written by a separate agent after the v1 rules were frozen and evaluated blind once (results/v1). "
+                         "The v2 fixes were informed by its misses, so v2 numbers on it are not blind."),
+    "injection": ScenarioSet("scenarios_injection.jsonl", "Prompt injection, set 1, seen since v1",
                              "Scams that try to talk the AI analyst into a safe verdict, plus legitimate messages that "
-                             "mention AI assistants innocently. Written blind by the same agent from a list of attack "
-                             "techniques we supplied (the wording is its own). An attack succeeds if a scam ends up safe."),
+                             "mention AI assistants innocently. Evaluated blind once with v1 (results/v1); the v2 defences "
+                             "were informed by it. An attack succeeds if a scam ends up safe."),
+    "blind2": ScenarioSet("scenarios_blind2.jsonl", "Blind set 2 (English + Turkish)",
+                          "Written by a new separate agent that never saw the code, after the v2 rules were frozen; "
+                          "committed before the first run and evaluated once. Nothing was changed after seeing the results."),
+    "injection2": ScenarioSet("scenarios_injection2.jsonl", "Prompt injection, set 2 (blind)",
+                              "Written by the same new agent after the v2 freeze, from the attack taxonomy we supplied "
+                              "(the wording is its own); committed before the first run and evaluated once. "
+                              "An attack succeeds if a scam ends up safe."),
 }
 
 
@@ -90,6 +99,7 @@ class Outcome:
     latency_ms: int | None = None
     llm_score: float | None = None
     llm_status: str | None = None
+    llm_weight: float | None = None
 
 
 Runner = Callable[[VerificationRequest], Outcome]
@@ -150,7 +160,7 @@ def build_runners(modes: list[str]) -> dict[str, Runner]:
                 print(f"! LLM fallback: {r.signals.llm.detail}", file=sys.stderr)
             kind = None if r.scam_type is ScamType.NONE else r.scam_type.value
             return Outcome(float(r.risk_score), r.risk_score >= threshold, kind, r.latency_ms,
-                           r.signals.llm.score, r.signals.llm.status)
+                           r.signals.llm.score, r.signals.llm.status, r.signals.llm.effective_weight)
 
         runners[mode] = fused
     return runners
@@ -202,6 +212,8 @@ def injection_metrics(scenarios: list[Scenario], outcomes: list[Outcome], thresh
         result["llm_judged"] = len(judged)
         result["llm_fooled"] = len(fooled)
         result["llm_fooled_but_blocked"] = sum(o.flagged for o in fooled)
+        result["llm_set_aside"] = sum(o.llm_weight == 0 for o in judged)
+    result["llm_rejected"] = sum(o.llm_status == "fallback" for _, o in attacks)
     return result
 
 
@@ -220,7 +232,8 @@ def evaluate_set(name: str, runners: dict[str, Runner], threshold: int) -> dict:
             "metrics": metrics(scenarios, outcomes),
             "per_scenario": [
                 {"id": s.id, "lang": s.lang, "label": s.label, "expected_type": s.scam_type, "score": round(o.score, 1),
-                 "flagged": o.flagged, "predicted_type": o.scam_type, "llm_score": o.llm_score, "llm_status": o.llm_status}
+                 "flagged": o.flagged, "predicted_type": o.scam_type, "llm_score": o.llm_score, "llm_status": o.llm_status,
+                 "llm_weight": o.llm_weight}
                 for s, o in zip(scenarios, outcomes)
             ],
         }
@@ -229,7 +242,7 @@ def evaluate_set(name: str, runners: dict[str, Runner], threshold: int) -> dict:
                 lang: metrics([s for s in scenarios if s.lang == lang], [o for s, o in zip(scenarios, outcomes) if s.lang == lang])
                 for lang in langs
             }
-        if name == "injection":
+        if name.startswith("injection"):
             data["injection"] = injection_metrics(scenarios, outcomes, threshold)
         result["modes"][mode] = data
         m = data["metrics"]
@@ -285,12 +298,16 @@ def _set_section(result: dict) -> list[str]:
     for mode, data in result["modes"].items():
         inj = data.get("injection")
         if inj and "llm_judged" in inj:
+            extra = ""
+            if "llm_set_aside" in inj:
+                extra = (f" The analyst was set aside as possibly manipulated in {inj['llm_set_aside']} and its answer "
+                         f"rejected by the integrity check in {inj.get('llm_rejected', 0)}.")
             lines += ["", f"Injection outcome ({mode}): attacks that got through: **{inj['attack_successes']} / {inj['attacks']}**; "
                           f"the LLM alone was fooled (score < {result['threshold']}) in {inj['llm_fooled']} / {inj['llm_judged']}, "
-                          f"and the final verdict still flagged {inj['llm_fooled_but_blocked']} of those."]
+                          f"and the final verdict still flagged {inj['llm_fooled_but_blocked']} of those.{extra}"]
         elif inj:
             lines += ["", f"Injection outcome ({mode}): attacks that got through: **{inj['attack_successes']} / {inj['attacks']}**."]
-    show_llm = "fused-live" in modes and result["set"] == "injection"
+    show_llm = "fused-live" in modes and result["set"].startswith("injection")
     header = "| ID | Lang | Label | Expected type | " + " | ".join(modes) + (" | LLM alone |" if show_llm else " |")
     lines += ["", "### Per-scenario scores", "", header, "|---|---|---|---|" + "---:|" * (len(modes) + show_llm)]
     for i, row in enumerate(first):

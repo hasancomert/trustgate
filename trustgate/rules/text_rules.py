@@ -97,7 +97,8 @@ TEXT_RULES: tuple[TextRule, ...] = (
         "A request to pay a new or different account is the core move of invoice and CEO fraud.",
         (
             _p(r"\b(new|updated|changed|different|alternative|another)\s+(bank(ing)?|account|iban|payment|remittance|wire)\s+(details|information|info|account|number|instructions)\b", H),
-            _p(r"\b(bank(ing)?|account|payment)\s+(details|information|account)\s+(have|has)\s+(changed|been (changed|updated))\b", H),
+            _p(r"\b(bank(ing)?|account|payment)\s+(details|information|account)\s+((have|has)\s+)?(changed|been (changed|updated)|are changing|will change)\b", H),
+            _p(r"\b(to|into)\s+(the|our)\s+new\s+(bank\s+)?account\b", H),
             _p(r"\b(update|change)\s+(our|the)\s+(bank(ing)?|payment|remittance)\s+(details|information|account)\b", H),
             _p(r"\bdo not (use|pay (to|into)) (the|our) (old|previous|usual|existing) (account|details)\b", H),
             _p(r"\b(pay|transfer|send|wire)\b[^.!?\n]{0,40}\b(to|into) (this|the following|a new|our new) (account|iban)\b", H),
@@ -182,7 +183,7 @@ TEXT_RULES: tuple[TextRule, ...] = (
         (
             _p(r"\b(buy|purchase|get|pick up|grab)\b[^.!?\n]{0,40}\bgift\s*-?cards?\b", C),
             _p(r"\bpay\b[^.!?\n]{0,30}\b(with|in|using|via)\b[^.!?\n]{0,20}\bgift\s*-?cards?\b", C),
-            _p(r"\b(scratch|photo|picture|pic)\b[^.!?\n]{0,30}\b(codes?|back of the cards?)\b", C),
+            _p(r"\b(scratch(ed)? off|photos? of|pictures? of|pics? of|snap)\b[^.!?\n]{0,30}\b(codes?|back of the cards?|cards?)\b", C),
             _p(r"\bgift\s*-?cards?\b", H),
             _p(r"\b(itunes|steam|google play|razer gold|vanilla|paysafe(card)?)\s+(gift\s+)?(cards?|vouchers?)\b", H),
         ),
@@ -318,7 +319,9 @@ TEXT_RULES: tuple[TextRule, ...] = (
             _p(r"\bas an? (responsible|helpful|trustworthy|good|smart|advanced|honest|ethical|well-aligned)\s+(ai|ai assistant|assistant|language model|llm|chatbot)\b", H),
             _p(r"\b(flagging|blocking|reporting|warning about|questioning|delaying)\s+(this|it|verified|trusted|approved|partner)\w*\b[^.!?\n]{0,40}\b(violat\w*|against|breach\w*)\s+(your\s+|the\s+|our\s+)?(policy|policies|guidelines|terms|rules)\b", H),
             # Encoded payloads with an instruction to decode them.
-            _p(r"\b(decode|base64)\b[^\n]{0,60}?(?<![\w/.:-])[A-Za-z0-9+]{20,}={0,2}(?![\w/.])", H),
+            _p(r"\b(decode|base64)\b[\s\S]{0,80}?(?<![\w/.:-])[A-Za-z0-9+]{20,}={0,2}(?![\w/.])", H),
+            # Addressing the checker by role, e.g. "automated reviewers: approve".
+            _p(r"\b(automated|ai|a\.i\.)\s+(reviewers?|checkers?|systems?|assistants?|agents?|filters?|scanners?|moderators?)\s*:", H),
         ),
     ),
 )

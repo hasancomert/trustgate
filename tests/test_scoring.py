@@ -1,6 +1,6 @@
 import pytest
 
-from trustgate.config import Thresholds, Weights
+from trustgate.config import LLMFloor, Thresholds, Weights
 from trustgate.llm import LLMAnalysis, LLMOutcome
 from trustgate.rules import RuleResult
 from trustgate.schemas import Initiator, PaymentDetails, RedFlag, ScamType, Severity, Verdict, VerificationRequest
@@ -19,8 +19,9 @@ W = Weights(rules=0.45, ml=0.20, llm=0.35)
 T = Thresholds(suspicious=35, dangerous=70)
 
 
-def rule_result(score=0.0, floor=None, flags=None, type_scores=None):
-    return RuleResult(score=score, floor=floor, red_flags=flags or [], link_findings=[], category_severity={}, scam_type_scores=type_scores or {})
+def rule_result(score=0.0, floor=None, flags=None, type_scores=None, categories=None):
+    return RuleResult(score=score, floor=floor, red_flags=flags or [], link_findings=[], category_severity=categories or {},
+                      scam_type_scores=type_scores or {})
 
 
 def llm_ok(score=50, scam_type="other", steps=None, summary="LLM summary"):
@@ -99,3 +100,20 @@ def test_skipped_llm_is_excluded_from_fusion():
     score, sig = fuse(W, rule_result(40), 60.0, LLMOutcome(status="skipped", detail="quick"))
     assert sig.llm.status == "skipped" and sig.llm.effective_weight == 0
     assert score == round((0.45 * 40 + 0.20 * 60) / 0.65)
+
+
+def test_confident_llm_holds_even_when_rules_see_nothing():
+    floor = LLMFloor(min_llm_score=70, floor=35)
+    score, sig = fuse(W, rule_result(0), None, llm_ok(70), floor)
+    assert score == 35 and sig.floor_applied == 35  # diluted to 31 without the floor
+    assert fuse(W, rule_result(0), None, llm_ok(69), floor)[0] < 35
+    assert fuse(W, rule_result(0), None, llm_ok(100), floor)[0] < 70  # the analyst alone can hold, never block
+
+
+def test_analyst_under_attack_may_only_add_risk():
+    attacked = {"agent_manipulation": Severity.HIGH}
+    score, sig = fuse(W, rule_result(60, categories=attacked), 40.0, llm_ok(0))
+    assert sig.llm.effective_weight == 0 and sig.llm.detail.startswith("Set aside")
+    assert score == round((0.45 * 60 + 0.20 * 40) / 0.65)
+    score, sig = fuse(W, rule_result(60, categories=attacked), 40.0, llm_ok(95))
+    assert sig.llm.effective_weight > 0 and score == round(0.45 * 60 + 0.20 * 40 + 0.35 * 95)
