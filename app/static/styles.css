@@ -184,6 +184,17 @@ button.ghost { background: transparent; color: var(--muted); border-color: var(-
   border: 2px solid var(--border); border-top-color: var(--primary); animation: spin 0.9s linear infinite;
 }
 .pending.note::before { display: none; }
+.share { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin-top: 14px; }
+.share-btn { display: inline-flex; align-items: center; gap: 8px; padding: 9px 18px; color: var(--text); }
+.share-btn:hover { background: var(--surface-2); }
+.share-icon { width: 18px; height: 18px; flex: none; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
+.v-suspicious .share-btn { color: var(--suspicious); border-color: var(--suspicious); }
+.v-dangerous .share-btn { color: var(--dangerous); border-color: var(--dangerous); }
+/* Wide screens: line up with the verdict text, past the 120px gauge and its 20px gap. Phones: a full-width button. */
+@media (min-width: 521px) { .share { padding-left: 140px; } }
+@media (max-width: 520px) { .share-btn { flex: 1; justify-content: center; } }
+.share-status { font-size: 13px; color: var(--muted); }
+.share-fallback { flex-basis: 100%; font: inherit; font-size: 13px; padding: 8px 10px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface-2); color: var(--text); resize: vertical; }
 .summary { font-size: 15.5px; margin: 16px 0 6px; padding: 12px 14px; background: var(--surface-2); border-radius: 10px; border-left: 4px solid var(--primary); }
 #report h4 { font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin: 22px 0 10px; }
 .count { font-weight: 600; }
@@ -231,10 +242,6 @@ mark[data-tip]:hover::after, mark[data-tip]:focus::after {
 .brand-warning { color: var(--dangerous); font-weight: 700; }
 
 .steps { margin: 0; padding-left: 22px; }
-.share { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin-top: 12px; }
-.share-btn { padding: 8px 16px; color: var(--text); }
-.share-status { font-size: 13px; color: var(--muted); }
-.share-fallback { flex-basis: 100%; font: inherit; font-size: 13px; padding: 8px 10px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface-2); color: var(--text); resize: vertical; }
 .steps li { margin-bottom: 8px; padding-left: 4px; }
 .steps li::marker { font-weight: 800; color: var(--primary); }
 
