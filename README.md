@@ -149,7 +149,7 @@ Without an API key everything still works: the LLM layer runs in mock mode and i
 
 Paste a message in English or Turkish, optionally add the sender, payment and links, and press **Verify**. The **Dangerous / Suspicious / Safe / AI agent / Turkish** buttons load demo cases.
 
-For a suspicious or dangerous result, **Warn family or colleagues** opens the phone's share sheet (or copies the text on a desktop): a short warning in English or Turkish naming the scam pattern and its warning signs, without repeating the scam's links or numbers.
+For a suspicious or dangerous result, the **Warn family or colleagues** button right under the verdict opens the phone's share sheet (or copies the text on a desktop): a short warning in English or Turkish naming the scam pattern and its warning signs, without repeating the scam's links or numbers.
 
 The first result appears almost instantly from the rules and the classifier. When the AI analyst is live, it reviews the message in parallel ("AI analyst is reviewing…") and its report replaces the preliminary one a few seconds later; a newer check is never overwritten by an older answer.
 
