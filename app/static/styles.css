@@ -59,6 +59,8 @@
 
 * { box-sizing: border-box; }
 html, body { margin: 0; }
+/* No automatic font boosting (e.g. a phone in "desktop site" mode enlarged long paragraphs but not headings). */
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
 body { background: var(--bg); color: var(--text); line-height: 1.5; font-size: 15px; }
 a { color: var(--primary); }
 h1, h2, h3, h4 { line-height: 1.25; margin: 0; }
