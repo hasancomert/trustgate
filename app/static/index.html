@@ -148,8 +148,19 @@
             <p class="pending" id="pending" role="status" hidden>AI analyst is reviewing…</p>
           </div>
         </div>
+        <div class="share" id="share" hidden>
+          <button type="button" class="ghost share-btn" id="share-btn">
+            <svg class="share-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4"/></svg>
+            Warn family or colleagues
+          </button>
+          <span class="share-status" id="share-status" role="status"></span>
+          <textarea class="share-fallback" id="share-fallback" rows="5" readonly hidden aria-label="Warning text to copy"></textarea>
+        </div>
 
         <p class="summary" id="summary"></p>
+
+        <h4>What to do now</h4>
+        <ol class="steps" id="steps"></ol>
 
         <h4>Message with red flags highlighted</h4>
         <div class="highlighted" id="highlighted"></div>
@@ -166,14 +177,6 @@
         <div id="links-section" hidden>
           <h4>Links</h4>
           <ul class="links" id="links"></ul>
-        </div>
-
-        <h4>What to do now</h4>
-        <ol class="steps" id="steps"></ol>
-        <div class="share" id="share" hidden>
-          <button type="button" class="ghost share-btn" id="share-btn">Warn family or colleagues</button>
-          <span class="share-status" id="share-status" role="status"></span>
-          <textarea class="share-fallback" id="share-fallback" rows="5" readonly hidden aria-label="Warning text to copy"></textarea>
         </div>
 
         <details class="signals" open>
