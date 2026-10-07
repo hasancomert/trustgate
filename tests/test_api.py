@@ -93,6 +93,13 @@ def test_index_and_static_assets(client):
         assert client.get(asset).status_code == 200
 
 
+def test_uptime_monitors_can_probe_with_head(client):
+    # UptimeRobot's free plan checks with HEAD; a 405 would report the live demo as down.
+    for path in ("/", "/api/health"):
+        r = client.head(path)
+        assert r.status_code == 200 and r.content == b""
+
+
 def test_page_and_assets_are_revalidated_after_a_deploy(client):
     for path in ("/", "/static/app.js", "/static/styles.css"):
         assert client.get(path).headers["Cache-Control"] == "no-cache"

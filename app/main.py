@@ -18,7 +18,7 @@ from pathlib import Path
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.exceptions import RequestValidationError
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse, JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
 
 from app.examples import EXAMPLES
@@ -120,6 +120,11 @@ def create_app(settings: Settings | None = None, gate_factory: Callable[[], Trus
     def health() -> dict:
         return {"status": "ok", "version": __version__, "layers": gate().status()}
 
+    # Uptime monitors (UptimeRobot's free plan, for one) probe with HEAD, which a GET route answers with 405.
+    @app.head("/api/health", include_in_schema=False)
+    def health_head() -> Response:
+        return Response()
+
     @app.get("/api/examples")
     def examples() -> list[dict]:
         return EXAMPLES
@@ -159,7 +164,7 @@ def create_app(settings: Settings | None = None, gate_factory: Callable[[], Trus
     if STATIC_DIR.exists():
         app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
-        @app.get("/", include_in_schema=False)
+        @app.api_route("/", methods=["GET", "HEAD"], include_in_schema=False)
         def index() -> FileResponse:
             return FileResponse(STATIC_DIR / "index.html")
 

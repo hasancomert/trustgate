@@ -138,7 +138,7 @@ python -m trustgate.ml.train        # ~1 min, writes models/tfidf_lr.joblib (add
 cp .env.example .env                # optional: set LLM_API_KEY for live AI analysis
 uvicorn app.main:app --reload       # open http://127.0.0.1:8000
 
-pytest                              # 251 tests, no network or datasets needed
+pytest                              # 252 tests, no network or datasets needed
 ```
 
 Without an API key everything still works: the LLM layer runs in mock mode and its weight is redistributed to the other layers.
@@ -337,7 +337,7 @@ The rule engine flags **0.0% of the 4,827 legitimate SMS** and **0.4% of a 25% s
 1. Push the repo to GitHub and in Render choose **New → Blueprint** (or use the button above). [`render.yaml`](render.yaml) defines a free web service.
 2. The build installs dependencies, downloads the datasets and trains the model (~3 min; training peaks around 1.1 GB, well within Render's 8 GB build machines). Nothing binary is committed. If the download or training step fails, the service still deploys, with the classifier reported as unavailable.
 3. Set **`LLM_API_KEY`** (your Featherless key) under *Environment*. Without it the AI analyst runs in mock mode.
-4. The service needs ~190 MB of RAM at runtime. Free instances sleep after 15 minutes without traffic; the [`keep-alive`](.github/workflows/keepalive.yml) workflow pings `/api/health` every 10 minutes to keep the demo awake (an always-on service uses ~720 of the 750 free instance hours a month; set the `LIVE_URL` repository variable if your URL differs).
+4. The service needs ~190 MB of RAM at runtime. Free instances sleep after 15 minutes without traffic, so an external uptime monitor (UptimeRobot's free plan) requests `/api/health` every 5 minutes to keep the demo awake; the page and the health endpoint also answer `HEAD`, which such monitors use. The [`keep-alive`](.github/workflows/keepalive.yml) workflow is only a backup: GitHub runs scheduled workflows on a best-effort basis, for us hours apart instead of every 10 minutes. An always-on service uses up to 744 of the 750 free instance hours a month; set the `LIVE_URL` repository variable if your URL differs.
 
 ## Limitations
 
