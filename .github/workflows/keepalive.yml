@@ -2,8 +2,10 @@ name: keep-alive
 
 # Render's free instances sleep after 15 minutes without traffic, and the first
 # visit then takes about a minute. Pinging the health endpoint keeps the live demo
-# awake (an always-on service uses ~720 of the 750 free instance hours a month).
-# The health check never calls the LLM, so it costs nothing.
+# awake (an always-on service uses up to 744 of the 750 free instance hours a month).
+# The health check never calls the LLM, so it costs nothing. GitHub runs schedules
+# on a best-effort basis (in practice hours apart), so an external uptime monitor
+# does the regular pinging and this workflow is the backup.
 on:
   schedule:
     - cron: "*/10 * * * *"

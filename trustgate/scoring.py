@@ -122,7 +122,7 @@ TYPE_STEPS: dict[ScamType, tuple[str, ...]] = {
         "Do not enter card details on a link sent by text to pay a small 'redelivery' or 'customs' fee.",
     ),
     ScamType.BANK_IMPERSONATION: (
-        "Hang up and call the number printed on the back of your card.",
+        "Call your bank on the number printed on the back of your card, not a number from the message.",
         "Your bank will never ask you to move money to a 'safe account' or to read out a one-time code.",
     ),
     ScamType.INVESTMENT_SCAM: (

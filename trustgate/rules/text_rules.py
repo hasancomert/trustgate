@@ -121,7 +121,7 @@ TEXT_RULES: tuple[TextRule, ...] = (
     ),
     TextRule(
         "text.channel_avoidance", "channel_avoidance", "Avoids a real conversation",
-        "Claiming they can't talk stops you from recognising the voice or confirming by phone.",
+        "Excuses not to talk, or telling you not to contact your bank, keep you from checking the story through a channel you trust.",
         (
             _p(r"\b(can't|cannot|unable to)\s+(talk|speak|call|answer|take calls|pick up)\b", M),
             _p(r"\b(i'm|i am)\s+(in|stuck in)\s+(a\s+)?(meeting|conference|board meeting)\b", M),

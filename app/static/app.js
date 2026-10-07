@@ -352,13 +352,29 @@ function flagItem(flag) {
   title.append(el("span", "flag-source", SOURCE_TEXT[flag.source] || flag.source));
   li.append(title);
   li.append(el("div", "flag-why", flag.explanation));
-  if (flag.evidence) li.append(el("code", "flag-evidence", flag.evidence));
+  flag.evidence.forEach((phrase) => li.append(el("code", "flag-evidence", phrase)));
   return li;
+}
+
+// A rule that fires on several phrases gets one card that quotes each of them, under its strongest severity.
+function groupFlags(flags) {
+  const groups = new Map();
+  for (const flag of flags) {
+    const key = [flag.source, flag.rule_id, flag.title].join("\n");
+    const group = groups.get(key);
+    if (!group) {
+      groups.set(key, { ...flag, evidence: flag.evidence ? [flag.evidence] : [] });
+      continue;
+    }
+    if (SEV_RANK[flag.severity] > SEV_RANK[group.severity]) group.severity = flag.severity;
+    if (flag.evidence && !group.evidence.includes(flag.evidence)) group.evidence.push(flag.evidence);
+  }
+  return [...groups.values()];
 }
 
 function renderFlags(flags) {
   const list = $("#flags");
-  const sorted = [...flags].sort((a, b) => SEV_RANK[b.severity] - SEV_RANK[a.severity]);
+  const sorted = groupFlags(flags).sort((a, b) => SEV_RANK[b.severity] - SEV_RANK[a.severity]);
   $("#flag-count").textContent = `(${sorted.length})`;
   if (!sorted.length) {
     list.replaceChildren(el("li", "muted", "No red flags found."));
