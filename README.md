@@ -4,7 +4,7 @@
 
 It is not an LLM wrapper: a deterministic rule engine, a static link analyzer, a statistical text classifier and an LLM analyst each contribute an independent signal, and the final score is a weighted fusion with safety floors. It reads **English and Turkish**.
 
-**Live demo: [trustgate-k45p.onrender.com](https://trustgate-k45p.onrender.com)** (free instance: the first request after it has been idle can take about a minute while it wakes up). Try the example buttons: *Dangerous*, *Suspicious*, *Safe*, *AI agent* (a checkout message that tries to instruct an AI shopping agent) and *Turkish*.
+**Live demo: [trustgate-k45p.onrender.com](https://trustgate-k45p.onrender.com)** (a free instance kept awake by an uptime monitor; if it has fallen asleep anyway, the first request takes about a minute). Try the example buttons: *Dangerous*, *Suspicious*, *Safe*, *AI agent* (a checkout message that tries to instruct an AI shopping agent) and *Turkish*.
 
 **Measured blind, twice.** On a fresh English + Turkish test set written by a separate agent after the v2 rules were frozen, all three layers reach **precision 0.92 and recall 0.885**, and **12 of 12 prompt-injection attacks** across the full attack taxonomy are held or blocked, including 3 that fooled the AI analyst. [Both rounds, and what they taught us](#evaluation).
 
@@ -85,7 +85,7 @@ Deterministic, explainable and fast (well under 50 ms on a typical message). Pat
 
 Single signals are combined with a noisy-OR, so ten weak hints don't add up to certainty. **Critical combinations** (e.g. *changed bank details + pressure*, *new number + money request*, *credential request + disguised link*) and critical flags set a **score floor**, so no other layer, including an LLM fooled by prompt injection, can talk the score down. One high-severity tactic on its own floors the score at 35 ("verify first").
 
-**Static link analysis** inspects the URL string only: it never resolves, fetches or opens a link (the test suite blocks sockets to prove it). It detects homoglyph and digit look-alikes (`paypa1.com`, Cyrillic `а`), punycode / IDN hosts, typosquats, brand-plus-bait combos (`brand-secure-verify.com`), brand names hidden in subdomains (`paypal.com.secure-check.xyz`), `user@host` tricks, raw IPs, URL shorteners, high-abuse TLDs, and mismatches between the claimed sender and the link domain. Real brand domains are used only as detection references.
+**Static link analysis** inspects the URL string only: it never resolves, fetches or opens a link (the test suite blocks sockets to prove it). It detects homoglyph and digit look-alikes (`paypa1.com`, Cyrillic `а`), punycode / IDN hosts, typosquats, brand-plus-bait combos (`brand-secure-verify.com`), brand names or the claimed sender's own name hidden in subdomains (`paypal.com.secure-check.xyz`), `user@host` tricks, raw IPs, URL shorteners, high-abuse TLDs, and mismatches between the claimed sender and the link domain. Real brand domains are used only as detection references.
 
 ### Layer 2: text classifier (`trustgate/ml/`)
 
@@ -341,7 +341,7 @@ The rule engine flags **0.0% of the 4,827 legitimate SMS** and **0.4% of a 25% s
 
 ## Limitations
 
-- **Two languages, unevenly.** The rules cover English and Turkish, but the Turkish patterns generalize poorly (blind recall 0.33 on their own), so Turkish leans on the LLM layer; the text classifier is English-only and is skipped for Turkish. Other languages rely on the LLM and on the language-independent checks (links, sender, payment details), so they will be under-reported.
+- **Two languages, on thin evidence.** The rules cover English and Turkish. On their own they caught 4 of 12 Turkish scams in blind round 1 and 9 of 12 in round 2 (English: 10 of 14, then 9 of 14), so Turkish is no longer the weak side, but twelve scams per round is little to go on. The text classifier is English-only and skipped for Turkish, which leaves Turkish more reliant on the LLM layer. Other languages rely on the LLM and on the language-independent checks (links, sender, payment details), so they will be under-reported.
 - **Static link analysis only.** We never visit links, so redirects, page content and domain age are out of scope. Look-alike detection is strongest for the brands in the reference list; for unknown brands it relies on the claimed sender name.
 - **The classifier's training data is old** (see *What we learned*); it is a weak signal on modern traffic.
 - **No AI-text detection, by design.** TrustGate judges what a message asks you to do, not who or what wrote it.
