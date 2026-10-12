@@ -11,10 +11,11 @@ For every test message it records:
 plus wall-clock latencies and the LLM's token usage. Every layer is mapped to a verdict with the
 product's own thresholds (>= 35 suspicious, >= 70 dangerous).
 
-Only evaluation code lives here: the production code is imported unchanged. Two evaluation-only
+Only evaluation code lives here: the production code is imported unchanged. Three evaluation-only
 settings differ from production: the LLM call budget is raised (the production cap of 30 calls a
-minute would turn part of the run into rule-only fallbacks), and every message is cut to the
-6,000 characters the public API accepts.
+minute would turn part of the run into rule-only fallbacks), every message is cut to the 6,000
+characters the public API accepts, and a check whose AI analyst was unavailable is run once more
+(production falls back to rules + classifier straight away).
 
     python eval/derby/run_derby_eval.py --workers 4
     python eval/derby/run_derby_eval.py --smoke 6     # harness check on earlier dev scenarios only
@@ -259,7 +260,7 @@ def main(argv: list[str] | None = None) -> int:
         "weights": harness.settings.scoring.weights.model_dump() if hasattr(harness.settings.scoring.weights, "model_dump") else str(harness.settings.scoring.weights),
     }
     out_path.with_suffix(".meta.json").write_text(json.dumps(meta, indent=2) + "\n")
-    print(f"wrote {out_path.relative_to(ROOT)}")
+    print(f"wrote {out_path}")
     return 0
 
 

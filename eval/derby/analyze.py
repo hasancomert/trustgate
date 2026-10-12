@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import json
 import math
+import re
 import statistics
 import sys
 from collections import Counter
@@ -24,6 +25,12 @@ import matplotlib.pyplot as plt  # noqa: E402
 HERE = Path(__file__).resolve().parent
 RESULTS = HERE / "results"
 FIGURES = HERE / "figures"
+SYNTHETIC_SET = HERE / "synthetic_set.jsonl"
+# Synthetic cases where a change of bank details (IBAN) is announced or requested, verified or not.
+BANK_CHANGE = re.compile(r"bank_details_change|bank_change|iban", re.I)
+TR_LETTERS = re.compile("[çğıöşüÇĞİÖŞÜ]")
+# USD per million tokens (input, output) for Qwen2.5-14B-Instruct, list prices checked 12 Oct 2026.
+TOKEN_PRICES = {"Alibaba Cloud": (0.35, 1.40), "Fireworks AI": (0.20, 0.20)}
 CLASSES = ("dangerous", "suspicious", "safe")
 LAYERS = (
     ("rules", "Rules"),
@@ -97,7 +104,7 @@ def pct(values: list[float], q: float) -> float:
 def timing(rows: list[dict]) -> dict:
     quick = [r["quick"]["ms"] for r in rows]
     full = [r["full"]["ms"] for r in rows if r["full"]["llm_status"] == "ok"]
-    calls = [r["full_call"]["seconds"] * 1000 for r in rows if r.get("full_call") and "seconds" in r["full_call"]]
+    calls = [r["full_call"]["seconds"] * 1000 for r in rows if r.get("full_call") and "seconds" in r["full_call"] and r["full"]["llm_status"] == "ok"]
     def stats(xs: list[float]) -> dict:
         return {"n": len(xs), "mean": round(statistics.mean(xs)), "median": round(statistics.median(xs)), "p95": round(pct(xs, 0.95))} if xs else {"n": 0}
     return {"quick_ms": stats(quick), "full_ms": stats(full), "llm_call_ms": stats(calls)}
@@ -115,23 +122,44 @@ def tokens(rows: list[dict]) -> dict:
 
 
 def complementarity(rows: list[dict]) -> dict:
-    """How the layers cover each other on messages that need a warning, and on safe ones."""
-    pos = [r for r in rows if r["label"] != "safe" and r["full"]["llm_status"] == "ok"]
-    neg = [r for r in rows if r["label"] == "safe" and r["full"]["llm_status"] == "ok"]
+    """How the layers cover each other. The rules and the AI analyst *alone* are independent detectors, so their
+    overlap shows what each one adds; the lists name the messages where one layer made up for another."""
+    pos = [r for r in rows if r["label"] != "safe"]
+    neg = [r for r in rows if r["label"] == "safe"]
     flag = lambda r, layer: verdict_of(r, layer) not in (None, "safe")  # noqa: E731
-    who = Counter()
+    who, full_rate = Counter(), Counter()
     for r in pos:
-        rules, ai = flag(r, "rules"), flag(r, "llm")
-        who["both" if rules and ai else "rules only" if rules else "AI only" if ai else "neither"] += 1
+        if verdict_of(r, "llm_blind") is None:
+            continue
+        rules, ai = flag(r, "rules"), flag(r, "llm_blind")
+        key = "both" if rules and ai else "rules only" if rules else "AI only" if ai else "neither"
+        who[key] += 1
+        full_rate[key] += flag(r, "full")
     return {
-        "positives": len(pos), "caught_by": dict(who),
-        "ai_rescued": sorted(r["id"] for r in pos if not flag(r, "rules") and flag(r, "full")),
-        "rules_held_when_ai_missed": sorted(r["id"] for r in pos if not flag(r, "llm") and flag(r, "full")),
-        "classifier_rescued": sorted(r["id"] for r in pos if not flag(r, "rules") and flag(r, "ml") and flag(r, "quick")),
+        "positives": len(pos), "compared": sum(who.values()), "caught_by": dict(who),
+        "full_flagged_by_group": {k: full_rate[k] for k in who},
+        # rules missed, the analyst (in the system) flagged, and the final verdict flagged
+        "ai_covered_rules": sorted(r["id"] for r in pos if not flag(r, "rules") and flag(r, "llm") and flag(r, "full")),
+        # the analyst alone missed, the rules flagged, and the final verdict flagged
+        "rules_covered_ai": sorted(r["id"] for r in pos if flag(r, "rules") and verdict_of(r, "llm_blind") == "safe" and flag(r, "full")),
+        # neither the rules nor the analyst alone flagged it, the instant rules + classifier answer did
+        "classifier_tipped": sorted(r["id"] for r in pos if not flag(r, "rules") and verdict_of(r, "llm_blind") == "safe" and flag(r, "quick")),
         "full_missed": sorted(r["id"] for r in pos if not flag(r, "full")),
         "false_alarms_full": sorted(r["id"] for r in neg if flag(r, "full")),
         "rule_false_alarms_cleared": sorted(r["id"] for r in neg if flag(r, "rules") and not flag(r, "full")),
+        "ai_false_alarms_held_back": sorted(r["id"] for r in neg if flag(r, "llm_blind") and not flag(r, "full")),
     }
+
+
+def enrich(rows: list[dict]) -> list[dict]:
+    """Add the synthetic cases' difficulty and scenario groups (the raw results hold no message text)."""
+    cases = {c["id"]: c for c in (json.loads(line) for line in SYNTHETIC_SET.read_text(encoding="utf-8").split("\n") if line.strip())}
+    for r in rows:
+        case = cases.get(r["id"]) if r["set"] == "synthetic" else None
+        r["difficulty"] = case["difficulty"] if case else None
+        r["bank_change"] = bool(case and BANK_CHANGE.search(case["scenario"]))
+        r["no_tr_letters"] = bool(case and r["lang"] == "tr" and not TR_LETTERS.search(case["request"]["message"]))
+    return rows
 
 
 SUBSETS = {
@@ -146,7 +174,41 @@ SUBSETS = {
     "synthetic_email": lambda r: r["set"] == "synthetic" and r["channel"] == "email",
     "synthetic_payment": lambda r: r["set"] == "synthetic" and r["has_payment"],
     "synthetic_ai_agent": lambda r: r["set"] == "synthetic" and r["initiator"] == "ai_agent",
+    "synthetic_bank_change": lambda r: r["set"] == "synthetic" and r["bank_change"],
+    "synthetic_links": lambda r: r["set"] == "synthetic" and r["has_urls"],
+    "synthetic_tr_no_tr_letters": lambda r: r["set"] == "synthetic" and r["no_tr_letters"],
+    "synthetic_easy": lambda r: r["set"] == "synthetic" and r["difficulty"] == "easy",
+    "synthetic_medium": lambda r: r["set"] == "synthetic" and r["difficulty"] == "medium",
+    "synthetic_hard": lambda r: r["set"] == "synthetic" and r["difficulty"] == "hard",
 }
+
+
+def language_detection(rows: list[dict]) -> dict:
+    """The classifier is skipped for messages the product detects as Turkish. How often is the detection right,
+    and what happens to safe Turkish messages that are taken for English?"""
+    out: dict = {}
+    for s in ("real", "synthetic"):
+        for lang in ("en", "tr"):
+            part = [r for r in rows if r["set"] == s and r["lang"] == lang]
+            out[f"{s}_{lang}"] = {"n": len(part), "detected": dict(Counter(r["full"]["language"] for r in part))}
+    for det in ("tr", "en"):
+        group = [r for r in rows if r["set"] == "real" and r["lang"] == "tr" and r["label"] == "safe" and r["full"]["language"] == det]
+        out[f"real_tr_safe_detected_{det}"] = {"n": len(group), **{f"{layer}_false_alarms": sum(1 for r in group if verdict_of(r, layer) not in (None, "safe"))
+                                                                    for layer in ("rules", "ml", "quick", "full")}}
+    return out
+
+
+def cost(tok: dict) -> dict:
+    """Approximate LLM cost of one full check (one analyst call), from the measured token counts."""
+    full = tok.get("full")
+    if not full:
+        return {}
+    out = {"prompt_tokens_mean": full["prompt_mean"], "completion_tokens_mean": full["completion_mean"], "per_check_usd": {}, "per_1000_checks_usd": {}}
+    for name, (pin, pout) in TOKEN_PRICES.items():
+        usd = (full["prompt_mean"] * pin + full["completion_mean"] * pout) / 1e6
+        out["per_check_usd"][name] = round(usd, 6)
+        out["per_1000_checks_usd"][name] = round(usd * 1000, 2)
+    return out
 
 
 def original_label_view(rows: list[dict]) -> dict:
@@ -178,7 +240,7 @@ def _style(ax) -> None:
 
 
 def chart_layers(metrics: dict, path: Path) -> None:
-    fig, axes = plt.subplots(1, 2, figsize=(11, 4.6), sharey=True, facecolor=SURFACE)
+    fig, axes = plt.subplots(1, 2, figsize=(11, 4.8), sharey=True, facecolor=SURFACE)
     names = [label for _, label in LAYERS]
     for ax, subset, title in zip(axes, ("real", "synthetic"), ("Real messages", "Synthetic messages")):
         _style(ax)
@@ -191,17 +253,18 @@ def chart_layers(metrics: dict, path: Path) -> None:
                 ci = b[f"{key}_ci95"] or (v, v)
                 vals.append(v); lo.append(v - ci[0]); hi.append(ci[1] - v)
             ys = [yy + offset for yy in y]
-            ax.barh(ys, vals, height=0.34, color=color, label=legend, zorder=2)
+            ax.barh(ys, vals, height=0.34, color=color, label=legend if subset == "real" else None, zorder=2)
             ax.errorbar(vals, ys, xerr=[lo, hi], fmt="none", ecolor=INK2, elinewidth=0.8, capsize=0, zorder=3)
-            for v, yy in zip(vals, ys):
-                ax.text(min(v, 1.0) + 0.012, yy, f"{v:.2f}", va="center", fontsize=8, color=INK2)
+            for v, top, yy in zip(vals, hi, ys):
+                ax.text(v + top + 0.015, yy, f"{v:.2f}", va="center", fontsize=8, color=INK2)
         ax.set_yticks(y, names)
-        ax.set_xlim(0, 1.12)
+        ax.set_xlim(0, 1.14)
         ax.set_title(f"{title} (n = {metrics[subset]['n']})", loc="left", fontsize=11, color=INK, pad=8)
-    axes[0].legend(loc="lower right", frameon=False, fontsize=9)
+    fig.legend(loc="upper right", bbox_to_anchor=(0.99, 0.985), ncol=2, frameon=False, fontsize=9)
     fig.suptitle("Precision and recall of each layer: does it flag the messages that need a warning?", x=0.01, ha="left", fontsize=12, color=INK)
-    fig.text(0.01, 0.005, "Flag = verdict suspicious or dangerous (score >= 35). Whiskers: 95% Wilson intervals.", fontsize=8, color=MUTED)
-    fig.tight_layout(rect=(0, 0.03, 1, 0.94))
+    fig.text(0.01, 0.005, "Flag = verdict suspicious or dangerous (score >= 35). Whiskers: 95% Wilson intervals. "
+             "The text classifier row includes Turkish messages, which production does not send to it.", fontsize=8, color=MUTED)
+    fig.tight_layout(rect=(0, 0.03, 1, 0.95))
     fig.savefig(path, dpi=200, facecolor=SURFACE)
     plt.close(fig)
 
@@ -237,26 +300,30 @@ def chart_confusion(metrics: dict, path: Path) -> None:
 
 
 def chart_language(metrics: dict, path: Path) -> None:
-    fig, axes = plt.subplots(1, 2, figsize=(11, 4.6), sharey=True, facecolor=SURFACE)
+    fig, axes = plt.subplots(1, 2, figsize=(11, 4.8), sharey=True, facecolor=SURFACE)
     names = [label for _, label in LAYERS]
-    pairs = (("real", ("real_en_email", "real_tr_sms"), ("English e-mail", "Turkish SMS"), "Real messages"),
-             ("synthetic", ("synthetic_en", "synthetic_tr"), ("English", "Turkish"), "Synthetic messages"))
-    for ax, (_, subsets, legends, title) in zip(axes, pairs):
+    pairs = ((("real_en_email", "real_tr_sms"), "Real: English e-mail vs. Turkish SMS"),
+             (("synthetic_en", "synthetic_tr"), "Synthetic: English vs. Turkish"))
+    for ax, (subsets, title) in zip(axes, pairs):
         _style(ax)
         y = list(range(len(LAYERS)))[::-1]
-        for offset, subset, color, legend in ((0.19, subsets[0], BLUE, legends[0]), (-0.19, subsets[1], ORANGE, legends[1])):
+        for offset, subset, color, legend in ((0.19, subsets[0], BLUE, "English"), (-0.19, subsets[1], ORANGE, "Turkish")):
             vals = [metrics[subset]["layers"][layer]["binary"]["f1"] or 0.0 for layer, _ in LAYERS]
             ys = [yy + offset for yy in y]
-            ax.barh(ys, vals, height=0.34, color=color, label=legend, zorder=2)
-            for v, yy in zip(vals, ys):
-                ax.text(v + 0.012, yy, f"{v:.2f}", va="center", fontsize=8, color=INK2)
+            ax.barh(ys, vals, height=0.34, color=color, label=legend if ax is axes[0] else None, zorder=2)
+            for (layer, _), v, yy in zip(LAYERS, vals, ys):
+                unused = layer == "ml" and legend == "Turkish"
+                if unused:  # production never sends Turkish it recognises to the English-only classifier
+                    ax.barh(yy, v, height=0.34, color=SURFACE, edgecolor=color, hatch="////", linewidth=0.8, zorder=2)
+                ax.text(v + 0.012, yy, f"{v:.2f}" + (" (not used for Turkish)" if unused else ""), va="center", fontsize=8, color=INK2)
         ax.set_yticks(y, names)
         ax.set_xlim(0, 1.12)
         ax.set_title(title, loc="left", fontsize=11, color=INK, pad=8)
-        ax.legend(loc="lower right", frameon=False, fontsize=9)
+    fig.legend(loc="upper right", bbox_to_anchor=(0.99, 0.985), ncol=2, frameon=False, fontsize=9)
     fig.suptitle("F1 by language (flag vs. no flag)", x=0.01, ha="left", fontsize=12, color=INK)
-    fig.text(0.01, 0.005, "The text classifier is English-only; in production it is skipped for Turkish messages.", fontsize=8, color=MUTED)
-    fig.tight_layout(rect=(0, 0.03, 1, 0.94))
+    fig.text(0.01, 0.005, "The text classifier is English-only; production skips it for messages it detects as Turkish. "
+             "Real Turkish SMS: only 15 of 669 need a warning, so F1 there mostly reflects false alarms.", fontsize=8, color=MUTED)
+    fig.tight_layout(rect=(0, 0.03, 1, 0.95))
     fig.savefig(path, dpi=200, facecolor=SURFACE)
     plt.close(fig)
 
@@ -283,28 +350,32 @@ def chart_latency(rows: list[dict], path: Path) -> None:
 
 
 def chart_complementarity(metrics: dict, path: Path) -> None:
-    order = (("both", "Rules and AI", BLUE), ("rules only", "Rules only", ORANGE), ("AI only", "AI analyst only", AQUA), ("neither", "Neither", BASE))
-    fig, ax = plt.subplots(figsize=(10, 2.6), facecolor=SURFACE)
+    order = (("both", "Rules and AI analyst", BLUE), ("rules only", "Rules only", ORANGE), ("AI only", "AI analyst only", AQUA), ("neither", "Neither", BASE))
+    parts = (("synthetic", "Synthetic"), ("real_en_email", "Real English e-mail"), ("real_tr_sms", "Real Turkish SMS"))
+    fig, ax = plt.subplots(figsize=(10, 3.1), facecolor=SURFACE)
     _style(ax)
     ax.grid(False)
-    for i, (subset, title) in enumerate((("synthetic", "Synthetic"), ("real", "Real"))):
+    for i, (subset, title) in enumerate(parts[::-1]):
         comp = metrics[subset]["complementarity"]
-        total = comp["positives"] or 1
+        total = comp["compared"] or 1
         left = 0.0
         for key, label, color in order:
-            share = comp["caught_by"].get(key, 0) / total
+            count = comp["caught_by"].get(key, 0)
+            share = count / total
             ax.barh(i, share, left=left, height=0.5, color=color, edgecolor=SURFACE, linewidth=2, label=label if i == 0 else None)
-            if share >= 0.06:
-                ax.text(left + share / 2, i, f"{comp['caught_by'].get(key, 0)}", ha="center", va="center", fontsize=9,
+            if share >= 0.05:
+                ax.text(left + share / 2, i, f"{count}", ha="center", va="center", fontsize=9,
                         color=SURFACE if color in (BLUE, ORANGE) else INK)
             left += share
-        ax.text(1.01, i, f"{title}: {comp['positives']} messages", va="center", fontsize=9, color=INK2)
+        ax.text(1.01, i, f"{title}\n{comp['compared']} messages", va="center", fontsize=9, color=INK2)
     ax.set_yticks([])
-    ax.set_xlim(0, 1.25)
+    ax.set_xlim(0, 1.27)
     ax.set_xticks([0, 0.25, 0.5, 0.75, 1.0], ["0%", "25%", "50%", "75%", "100%"])
-    ax.legend(loc="upper center", bbox_to_anchor=(0.42, -0.25), ncol=4, frameon=False, fontsize=9)
-    ax.set_title("Messages that need a warning: which layer flagged them?", loc="left", fontsize=12, color=INK, pad=8)
-    fig.tight_layout()
+    ax.legend(loc="upper center", bbox_to_anchor=(0.4, -0.18), ncol=4, frameon=False, fontsize=9)
+    ax.set_title("Messages that need a warning: which independent layer flagged them?", loc="left", fontsize=12, color=INK, pad=8)
+    fig.text(0.01, 0.01, "AI analyst = the model on the message alone, without the other layers' findings. Flag = score >= 35.",
+             fontsize=8, color=MUTED)
+    fig.tight_layout(rect=(0, 0.04, 1, 1))
     fig.savefig(path, dpi=200, facecolor=SURFACE)
     plt.close(fig)
 
@@ -354,7 +425,7 @@ def main() -> int:
     raw = RESULTS / "raw_results.jsonl"
     if len(sys.argv) > 1:
         raw = Path(sys.argv[1])
-    rows = [json.loads(line) for line in raw.read_text(encoding="utf-8").split("\n") if line.strip()]
+    rows = enrich([json.loads(line) for line in raw.read_text(encoding="utf-8").split("\n") if line.strip()])
     metrics: dict = {}
     for name, keep in SUBSETS.items():
         part = [r for r in rows if keep(r)]
@@ -365,7 +436,9 @@ def main() -> int:
                       "retries": sum(r.get("retries", 0) for r in rows),
                       "llm_status": dict(Counter(r["full"]["llm_status"] for r in rows)),
                       "llm_blind_status": dict(Counter(r["llm_blind"]["status"] for r in rows))}
+    metrics["all"]["cost"] = cost(metrics["all"]["tokens"])
     metrics["original_labels"] = original_label_view(rows)
+    metrics["language_detection"] = language_detection(rows)
     RESULTS.mkdir(exist_ok=True)
     (RESULTS / "metrics.json").write_text(json.dumps(metrics, indent=1) + "\n")
     (RESULTS / "tables.md").write_text("# Derby evaluation: generated tables\n" + tables(metrics) + "\n## Confusion matrices\n" + confusion_tables(metrics))

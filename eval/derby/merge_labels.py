@@ -3,7 +3,9 @@
 Each labeller saw one batch of real messages (no original dataset labels, no system output) and
 returned one label per message. This script checks that every batch is complete and well formed,
 writes the merged labels (ids and labels only, no message text), and compares a blind 10% spot
-check by the author with the labellers' labels (agreement and Cohen's kappa).
+check with the labellers' labels (agreement and Cohen's kappa). The spot check was labelled by the
+AI assistant that ran this evaluation, before it saw any labeller output; no human has re-labelled
+these messages yet.
 
     python eval/derby/merge_labels.py <labelling dir>
 """
@@ -61,7 +63,7 @@ def main(lab_dir: Path) -> int:
         "cohen_kappa_3class": kappa(mine, theirs),
         "binary_agreement_flag_vs_safe": round(bin_agree / len(ids), 3),
         "cohen_kappa_binary": kappa(["safe" if not flag(x) else "dangerous" for x in mine], ["safe" if not flag(x) else "dangerous" for x in theirs]),
-        "disagreements": [{"id": i, "author": a, "labeller": b} for i, a, b in zip(ids, mine, theirs) if a != b],
+        "disagreements": [{"id": i, "spot_check": a, "labeller": b} for i, a, b in zip(ids, mine, theirs) if a != b],
         "by_source": {},
     }
     for src in ("trsms", "trec07"):

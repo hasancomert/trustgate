@@ -1,0 +1,18 @@
+{
+  "started_at": "2026-10-12T18:56:46+00:00",
+  "finished_at": "2026-10-12T19:21:40+00:00",
+  "model": "Qwen/Qwen2.5-14B-Instruct",
+  "base_url": "https://api.featherless.ai/v1",
+  "temperature": 0.1,
+  "workers": 2,
+  "messages": 150,
+  "thresholds": {
+    "suspicious": 35,
+    "dangerous": 70
+  },
+  "weights": {
+    "rules": 0.45,
+    "ml": 0.2,
+    "llm": 0.35
+  }
+}

@@ -7,17 +7,17 @@
  "disagreements": [
   {
    "id": "trec07-40648",
-   "author": "suspicious",
+   "spot_check": "suspicious",
    "labeller": "dangerous"
   },
   {
    "id": "trsms-train-240",
-   "author": "safe",
+   "spot_check": "safe",
    "labeller": "suspicious"
   },
   {
    "id": "trsms-train-462",
-   "author": "suspicious",
+   "spot_check": "suspicious",
    "labeller": "safe"
   }
  ],
