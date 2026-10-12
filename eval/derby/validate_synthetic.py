@@ -47,7 +47,7 @@ def brand_hits(text: str) -> list[str]:
 def main(paths: list[str]) -> int:
     cases, problems = [], []
     for path in paths:
-        for n, line in enumerate(Path(path).read_text(encoding="utf-8").splitlines(), 1):
+        for n, line in enumerate(Path(path).read_text(encoding="utf-8").split("\n"), 1):
             if not line.strip():
                 continue
             try:
@@ -76,7 +76,7 @@ def main(paths: list[str]) -> int:
     near_train = NearDupIndex([ex.text for ex in training]).max_jaccard([c["request"]["message"] for c in cases])
     scen = []
     for path in sorted((ROOT / "eval").glob("scenarios*.jsonl")):
-        scen += [json.loads(l)["request"]["message"] for l in path.read_text().splitlines() if l.strip()]
+        scen += [json.loads(l)["request"]["message"] for l in path.read_text().split("\n") if l.strip()]
     near_scen = NearDupIndex(scen).max_jaccard([c["request"]["message"] for c in cases])
     for c, jt, js in zip(cases, near_train, near_scen):
         if jt >= NEAR_DUP_JACCARD or js >= NEAR_DUP_JACCARD:

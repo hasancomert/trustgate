@@ -125,7 +125,7 @@ def main() -> int:
     train_index = NearDupIndex([ex.text for ex in training])
     scenario_texts = []
     for path in sorted((ROOT / "eval").glob("scenarios*.jsonl")):
-        scenario_texts += [json.loads(line)["request"]["message"] for line in path.read_text().splitlines() if line.strip()]
+        scenario_texts += [json.loads(line)["request"]["message"] for line in path.read_text().split("\n") if line.strip()]
     scenario_index = NearDupIndex(scenario_texts)
     seen: set[str] = set()
 

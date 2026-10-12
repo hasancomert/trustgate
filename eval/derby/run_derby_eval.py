@@ -118,18 +118,20 @@ def to_request(item: dict) -> VerificationRequest:
 
 def load_items(sets: list[str], smoke: int) -> list[dict]:
     if smoke:
-        scenarios = [json.loads(line) for line in (ROOT / "eval" / "scenarios.jsonl").read_text().splitlines() if line.strip()]
+        scenarios = [json.loads(line) for line in (ROOT / "eval" / "scenarios.jsonl").read_text().split("\n") if line.strip()]
         return [{"set": "smoke", "id": s["id"], "lang": "en", "label": "dangerous" if s["label"] == "scam" else "safe",
                  "request": s["request"], "channel": s["request"].get("channel", "other")} for s in scenarios[:smoke]]
     items: list[dict] = []
     if "real" in sets:
-        labels = {row["id"]: row for row in map(json.loads, REAL_LABELS.read_text().splitlines()) if row}
-        for line in REAL_TEXTS.read_text(encoding="utf-8").splitlines():
+        labels = {row["id"]: row for row in (json.loads(line) for line in REAL_LABELS.read_text().split("\n") if line.strip())}
+        for line in REAL_TEXTS.read_text(encoding="utf-8").split("\n"):
+            if not line.strip():
+                continue
             it = json.loads(line)
             lab = labels[it["id"]]
             items.append({**it, "set": "real", "label": lab["label"], "label_confidence": lab.get("confidence")})
     if "synthetic" in sets:
-        for line in SYNTHETIC.read_text(encoding="utf-8").splitlines():
+        for line in SYNTHETIC.read_text(encoding="utf-8").split("\n"):
             if line.strip():
                 s = json.loads(line)
                 items.append({**s, "set": "synthetic", "channel": s["request"]["channel"]})

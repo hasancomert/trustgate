@@ -354,7 +354,7 @@ def main() -> int:
     raw = RESULTS / "raw_results.jsonl"
     if len(sys.argv) > 1:
         raw = Path(sys.argv[1])
-    rows = [json.loads(line) for line in raw.read_text(encoding="utf-8").splitlines() if line.strip()]
+    rows = [json.loads(line) for line in raw.read_text(encoding="utf-8").split("\n") if line.strip()]
     metrics: dict = {}
     for name, keep in SUBSETS.items():
         part = [r for r in rows if keep(r)]

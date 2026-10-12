@@ -1,0 +1,34 @@
+{
+ "spot_check_size": 107,
+ "exact_agreement": 0.972,
+ "cohen_kappa_3class": 0.925,
+ "binary_agreement_flag_vs_safe": 0.981,
+ "cohen_kappa_binary": 0.946,
+ "disagreements": [
+  {
+   "id": "trec07-40648",
+   "author": "suspicious",
+   "labeller": "dangerous"
+  },
+  {
+   "id": "trsms-train-240",
+   "author": "safe",
+   "labeller": "suspicious"
+  },
+  {
+   "id": "trsms-train-462",
+   "author": "suspicious",
+   "labeller": "safe"
+  }
+ ],
+ "by_source": {
+  "trsms": {
+   "n": 67,
+   "exact_agreement": 0.97
+  },
+  "trec07": {
+   "n": 40,
+   "exact_agreement": 0.975
+  }
+ }
+}

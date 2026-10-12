@@ -33,8 +33,8 @@ def kappa(a: list[str], b: list[str]) -> float:
 def main(lab_dir: Path) -> int:
     merged = []
     for batch in BATCHES:
-        inputs = [json.loads(l)["id"] for l in (lab_dir / f"{batch}.jsonl").read_text(encoding="utf-8").splitlines() if l.strip()]
-        outputs = [json.loads(l) for l in (lab_dir / f"out_{batch}.jsonl").read_text(encoding="utf-8").splitlines() if l.strip()]
+        inputs = [json.loads(l)["id"] for l in (lab_dir / f"{batch}.jsonl").read_text(encoding="utf-8").split("\n") if l.strip()]
+        outputs = [json.loads(l) for l in (lab_dir / f"out_{batch}.jsonl").read_text(encoding="utf-8").split("\n") if l.strip()]
         assert [o["id"] for o in outputs] == inputs, f"{batch}: ids missing, extra or out of order"
         for o in outputs:
             assert o["label"] in LABELS, f"{batch}: bad label {o['label']!r}"
